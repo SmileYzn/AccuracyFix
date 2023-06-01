@@ -7,7 +7,7 @@ public:
 	void POST_UpdateClientData(CBasePlayer* Player);
 
 	void PRE_Weapon_AK47(CBasePlayer* Player, CBasePlayerWeapon* Weapon);
-
+	void PRE_Weapon_M4A1(CBasePlayer* Player, CBasePlayerWeapon* Weapon);
 private:
 	float m_fAccuracy = 0;
 };

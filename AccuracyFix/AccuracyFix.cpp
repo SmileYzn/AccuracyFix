@@ -19,6 +19,11 @@ void CAccuracyFix::PRE_UpdateClientData(CBasePlayer* Player)
 						this->PRE_Weapon_AK47(Player, Weapon);
 						break;
 					}
+					case WEAPON_M4A1:
+					{
+						this->PRE_Weapon_M4A1(Player, Weapon);
+						break;
+					}
 				}
 			}
 		}
@@ -51,15 +56,15 @@ void CAccuracyFix::PRE_Weapon_AK47(CBasePlayer* Player, CBasePlayerWeapon* Weapo
 {
 	static int ShotsFired;
 
-	ShotsFired = Weapon->m_iShotsFired + 1;
+	ShotsFired = (Weapon->m_iShotsFired - 1);
 
-	if (ShotsFired > 1)
+	if (ShotsFired >= 0)
 	{
-		this->m_fAccuracy = ((ShotsFired * ShotsFired * ShotsFired) / 200.0) + 0.35;
+		this->m_fAccuracy = ((ShotsFired * ShotsFired * ShotsFired) / 200.0f) + 0.35f;
 
-		if (this->m_fAccuracy > 1.25)
+		if (this->m_fAccuracy > 1.25f)
 		{
-			this->m_fAccuracy = 1.25;
+			this->m_fAccuracy = 1.25f;
 		}
 
 		Weapon->m_flAccuracy = this->m_fAccuracy;
@@ -86,7 +91,51 @@ void CAccuracyFix::PRE_Weapon_AK47(CBasePlayer* Player, CBasePlayerWeapon* Weapo
 		}
 		else
 		{
-			Weapon->m_flAccuracy = 0.1f;
+			Weapon->m_flAccuracy = 0.2f;
+		}
+	}
+}
+
+void CAccuracyFix::PRE_Weapon_M4A1(CBasePlayer* Player, CBasePlayerWeapon* Weapon)
+{
+	static int ShotsFired;
+
+	ShotsFired = (Weapon->m_iShotsFired - 1);
+
+	if (ShotsFired >= 0)
+	{
+		this->m_fAccuracy = ((ShotsFired * ShotsFired * ShotsFired) / 220.0f) + 0.35f;
+
+		if (this->m_fAccuracy > 1.25f)
+		{
+			this->m_fAccuracy = 1.25f;
+		}
+
+		Weapon->m_flAccuracy = this->m_fAccuracy;
+	}
+	else
+	{
+		if (Player->pev->flags & FL_ONGROUND)
+		{
+			if (!Player->pev->velocity[0] && !Player->pev->velocity[1])
+			{
+				if (Player->pev->flags & FL_DUCKING)
+				{
+					Weapon->m_flAccuracy = 0.0f;
+				}
+				else
+				{
+					Weapon->m_flAccuracy = 0.1f;
+				}
+			}
+			else
+			{
+				Weapon->m_flAccuracy = 0.2f;
+			}
+		}
+		else
+		{
+			Weapon->m_flAccuracy = 0.2f;
 		}
 	}
 }
