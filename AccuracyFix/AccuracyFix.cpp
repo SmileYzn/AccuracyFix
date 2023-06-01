@@ -51,8 +51,6 @@ void CAccuracyFix::PRE_Weapon_AK47(CBasePlayer* Player, CBasePlayerWeapon* Weapo
 {
 	static int ShotsFired;
 
-	ShotsFired = Weapon->m_iShotsFired;
-
 	ShotsFired = Weapon->m_iShotsFired + 1;
 
 	if (ShotsFired > 1)
