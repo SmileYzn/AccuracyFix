@@ -2,27 +2,30 @@
 
 CAccuracyFix gAccuracyFix;
 
-void CAccuracyFix::PRE_UpdateClientData(CBasePlayer* Player)
+void CAccuracyFix::PRE_PostThink(CBasePlayer* Player)
 {
 	if (Player->m_pActiveItem)
 	{
 		if (Player->pev->button & IN_ATTACK)
 		{
-			auto Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
-
-			if (Weapon)
+			if (Player->m_bCanShoot && !g_pGameRules->IsFreezePeriod() && !Player->m_bIsDefusing)
 			{
-				switch (Player->m_pActiveItem->m_iId)
+				auto Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
+
+				if (Weapon)
 				{
-					case WEAPON_AK47:
+					switch (Player->m_pActiveItem->m_iId)
 					{
-						this->PRE_Weapon_AK47(Player, Weapon);
-						break;
-					}
-					case WEAPON_M4A1:
-					{
-						this->PRE_Weapon_M4A1(Player, Weapon);
-						break;
+						case WEAPON_AK47:
+						{
+							this->PRE_Weapon_AK47(Player, Weapon);
+							break;
+						}
+						case WEAPON_M4A1:
+						{
+							this->PRE_Weapon_M4A1(Player, Weapon);
+							break;
+						}
 					}
 				}
 			}
@@ -30,21 +33,24 @@ void CAccuracyFix::PRE_UpdateClientData(CBasePlayer* Player)
 	}
 }
 
-void CAccuracyFix::POST_UpdateClientData(CBasePlayer* Player)
+void CAccuracyFix::POST_PostThink(CBasePlayer* Player)
 {
 	if (Player->m_pActiveItem)
 	{
 		if (Player->pev->button & IN_ATTACK)
 		{
-			auto Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
-
-			if (Weapon)
+			if (Player->m_bCanShoot && !g_pGameRules->IsFreezePeriod() && !Player->m_bIsDefusing)
 			{
-				switch (Player->m_pActiveItem->m_iId)
+				auto Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
+
+				if (Weapon)
 				{
-					case WEAPON_AK47:
+					switch (Player->m_pActiveItem->m_iId)
 					{
-						break;
+						case WEAPON_AK47:
+						{
+							break;
+						}
 					}
 				}
 			}

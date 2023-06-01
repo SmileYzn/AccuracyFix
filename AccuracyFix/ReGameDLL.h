@@ -9,4 +9,4 @@ extern bool ReGameDLL_Init();
 extern bool ReGameDLL_Stop();
 
 CGameRules *ReGameDLL_InstallGameRules(IReGameHook_InstallGameRules* chain);
-void ReGameDLL_CBasePlayer_UpdateClientData(IReGameHook_CBasePlayer_UpdateClientData* chain, CBasePlayer* Player);
+void ReGameDLL_CBasePlayer_PostThink(IReGameHook_CBasePlayer_PostThink* chain, CBasePlayer* Player);
