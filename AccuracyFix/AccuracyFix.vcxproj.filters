@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="AccuracyFix">
+      <UniqueIdentifier>{a80634f4-7ea8-43d9-bd93-194fd324f8f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MetaMod">
+      <UniqueIdentifier>{d20aa8b5-b1bc-4795-8120-07248aed589a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MetaMod\Precompiled">
+      <UniqueIdentifier>{21087362-0ac7-405f-a796-1b32a8ff8297}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AccuracyFix\AccuracyFix">
+      <UniqueIdentifier>{99090436-7369-4fa3-a7c2-94b0b1cca306}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MetaMod\MetaDLL">
+      <UniqueIdentifier>{96d4c2a9-3ee8-42d3-a250-a82a1d5e8eda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MetaMod\MetaEngine">
+      <UniqueIdentifier>{6194b99d-17a4-457b-b13c-e6d37dea1ad5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ReAPI">
+      <UniqueIdentifier>{a3b6208b-d507-4c1a-b399-916d95724ca3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ReGameDLL">
+      <UniqueIdentifier>{3a2f7dd5-133f-41d5-b627-5e16bbe5f958}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AccuracyFix.def">
+      <Filter>AccuracyFix</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="precompiled.cpp">
+      <Filter>MetaMod\Precompiled</Filter>
+    </ClCompile>
+    <ClCompile Include="AccuracyFix.cpp">
+      <Filter>AccuracyFix\AccuracyFix</Filter>
+    </ClCompile>
+    <ClCompile Include="MetaMod.cpp">
+      <Filter>MetaMod</Filter>
+    </ClCompile>
+    <ClCompile Include="MetaDLL.cpp">
+      <Filter>MetaMod\MetaDLL</Filter>
+    </ClCompile>
+    <ClCompile Include="MetaEngine.cpp">
+      <Filter>MetaMod\MetaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="ReAPI.cpp">
+      <Filter>ReAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="ReGameDLL.cpp">
+      <Filter>ReGameDLL</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="precompiled.h">
+      <Filter>MetaMod\Precompiled</Filter>
+    </ClInclude>
+    <ClInclude Include="AccuracyFix.h">
+      <Filter>AccuracyFix\AccuracyFix</Filter>
+    </ClInclude>
+    <ClInclude Include="MetaMod.h">
+      <Filter>MetaMod</Filter>
+    </ClInclude>
+    <ClInclude Include="MetaDLL.h">
+      <Filter>MetaMod\MetaDLL</Filter>
+    </ClInclude>
+    <ClInclude Include="MetaEngine.h">
+      <Filter>MetaMod\MetaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="ReAPI.h">
+      <Filter>ReAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="ReGameDLL.h">
+      <Filter>ReGameDLL</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
