@@ -38,9 +38,6 @@ jobs:
         # Move released file to dlls
         mv ./AccuracyFix/Release/accuracyfix_mm.so publish/addons/accuracyfix/dlls
 
-        # Copy cstrike contents to publish dir
-        cp -ar cstrike/. publish
-
     - name: Deploy artifacts
       uses: actions/upload-artifact@v3
       with:
