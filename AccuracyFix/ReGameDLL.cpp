@@ -81,12 +81,16 @@ bool ReGameDLL_Init()
 
 	g_ReGameHookchains->InstallGameRules()->registerHook(ReGameDLL_InstallGameRules);
 
+	g_ReGameHookchains->CBasePlayer_UpdateClientData()->registerHook(ReGameDLL_CBasePlayer_UpdateClientData);
+
 	return true;
 }
 
 bool ReGameDLL_Stop()
 {
 	g_ReGameHookchains->InstallGameRules()->unregisterHook(ReGameDLL_InstallGameRules);
+
+	g_ReGameHookchains->CBasePlayer_UpdateClientData()->unregisterHook(ReGameDLL_CBasePlayer_UpdateClientData);
 
 	return true;
 }
@@ -105,4 +109,13 @@ CGameRules *ReGameDLL_InstallGameRules(IReGameHook_InstallGameRules *chain)
 	}
 	
 	return gamerules;
+}
+
+void ReGameDLL_CBasePlayer_UpdateClientData(IReGameHook_CBasePlayer_UpdateClientData* chain, CBasePlayer* Player)
+{
+	gAccuracyFix.PRE_UpdateClientData(Player);
+
+	chain->callNext(Player);
+
+	gAccuracyFix.POST_UpdateClientData(Player);
 }

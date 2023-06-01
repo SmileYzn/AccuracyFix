@@ -11,7 +11,7 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
 {
 	memset(&gDLL_FunctionTable_Pre, 0, sizeof(DLL_FUNCTIONS));
 
-	// Functions Here //
+	// Register Functions Here //
 
 	memcpy(pFunctionTable, &gDLL_FunctionTable_Pre, sizeof(DLL_FUNCTIONS));
 
@@ -24,10 +24,17 @@ C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS* pFunctionTable, int* interface
 {
 	memset(&gDLL_FunctionTable_Post, 0, sizeof(DLL_FUNCTIONS));
 
-	// Functions Here //
+	gDLL_FunctionTable_Post.pfnServerActivate = DLL_POST_ServerActivate;
 
 	memcpy(pFunctionTable, &gDLL_FunctionTable_Post, sizeof(DLL_FUNCTIONS));
 
 	return 1;
+}
+
+void DLL_POST_ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
+{
+	gLowFpsSpreadCoolDownFix.ServerActivate();
+
+	RETURN_META(MRES_IGNORED);
 }
 #pragma endregion
