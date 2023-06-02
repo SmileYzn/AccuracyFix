@@ -2,30 +2,27 @@
 
 CAccuracyFix gAccuracyFix;
 
-void CAccuracyFix::PRE_PostThink(CBasePlayer* Player)
+void CAccuracyFix::PRE_SetAnimation(CBasePlayer* Player, PLAYER_ANIM playerAnim)
 {
 	if (Player->m_pActiveItem)
 	{
-		if (Player->pev->button & IN_ATTACK)
+		if (playerAnim == PLAYER_ATTACK1)
 		{
-			if (Player->m_bCanShoot && !g_pGameRules->IsFreezePeriod() && !Player->m_bIsDefusing)
-			{
-				auto Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
+			CBasePlayerWeapon* Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
 
-				if (Weapon)
+			if (Weapon)
+			{
+				switch (Player->m_pActiveItem->m_iId)
 				{
-					switch (Player->m_pActiveItem->m_iId)
+					case WEAPON_AK47:
 					{
-						case WEAPON_AK47:
-						{
-							this->PRE_Weapon_AK47(Player, Weapon);
-							break;
-						}
-						case WEAPON_M4A1:
-						{
-							this->PRE_Weapon_M4A1(Player, Weapon);
-							break;
-						}
+						this->PRE_Weapon_AK47(Player, Weapon);
+						break;
+					}
+					case WEAPON_M4A1:
+					{
+						this->PRE_Weapon_M4A1(Player, Weapon);
+						break;
 					}
 				}
 			}
@@ -33,26 +30,17 @@ void CAccuracyFix::PRE_PostThink(CBasePlayer* Player)
 	}
 }
 
-void CAccuracyFix::POST_PostThink(CBasePlayer* Player)
+void CAccuracyFix::POST_SetAnimation(CBasePlayer* Player, PLAYER_ANIM playerAnim)
 {
 	if (Player->m_pActiveItem)
 	{
-		if (Player->pev->button & IN_ATTACK)
+		if (playerAnim == PLAYER_ATTACK1)
 		{
-			if (Player->m_bCanShoot && !g_pGameRules->IsFreezePeriod() && !Player->m_bIsDefusing)
-			{
-				auto Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
+			CBasePlayerWeapon* Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
 
-				if (Weapon)
-				{
-					switch (Player->m_pActiveItem->m_iId)
-					{
-						case WEAPON_AK47:
-						{
-							break;
-						}
-					}
-				}
+			if (Weapon)
+			{
+				/**/
 			}
 		}
 	}
