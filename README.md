@@ -7,5 +7,5 @@
     <a href="https://github.com/SmileYzn/AccuracyFix/actions"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/smileyzn/AccuracyFix/makefile.yml?branch=main&label=Linux&style=flat-square"></a>
 </p>
 
-<h3>Attention</h3>
-<p>Plugin is in a prototype stage, is not usable for now.</p>
+<h3 align="center">Attention</h3>
+<p align="center">Plugin is in a prototype stage, is not usable for now.</p>
