@@ -2,134 +2,59 @@
 
 CAccuracyFix gAccuracyFix;
 
-void CAccuracyFix::PRE_SetAnimation(CBasePlayer* Player, PLAYER_ANIM playerAnim)
+void CAccuracyFix::ServerActivate()
 {
-	if (Player->m_pActiveItem)
+	for (int WeaponID = WEAPON_P228; WeaponID <= WEAPON_P90; WeaponID++)
 	{
-		if (playerAnim == PLAYER_ATTACK1)
-		{
-			CBasePlayerWeapon* Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
+		auto SlotInfo = g_ReGameApi->GetWeaponSlot((WeaponIdType)WeaponID);
 
-			if (Weapon)
+		if (SlotInfo)
+		{
+			if (SlotInfo->slot == PRIMARY_WEAPON_SLOT || SlotInfo->slot == PISTOL_SLOT)
 			{
-				switch (Player->m_pActiveItem->m_iId)
+				if (SlotInfo->weaponName)
 				{
-					case WEAPON_AK47:
-					{
-						this->PRE_Weapon_AK47(Player, Weapon);
-						break;
-					}
-					case WEAPON_M4A1:
-					{
-						this->PRE_Weapon_M4A1(Player, Weapon);
-						break;
-					}
+					char cvarName[64] = { 0 };
+
+					Q_snprintf(cvarName, sizeof(cvarName), "af_punch_%s", SlotInfo->weaponName);
+
+					this->m_AF_PunchControl[WeaponID] = this->CvarRegister(cvarName, "1.0");
 				}
 			}
 		}
 	}
 }
 
-void CAccuracyFix::POST_SetAnimation(CBasePlayer* Player, PLAYER_ANIM playerAnim)
+cvar_t* CAccuracyFix::CvarRegister(const char* Name, const char* Value)
 {
-	if (Player->m_pActiveItem)
-	{
-		if (playerAnim == PLAYER_ATTACK1)
-		{
-			CBasePlayerWeapon* Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
+	// Get cvar pointer
+	cvar_t* Pointer = g_engfuncs.pfnCVarGetPointer(Name);
 
-			if (Weapon)
-			{
-				/**/
-			}
+	// If not exists
+	if (!Pointer)
+	{
+		// Variable for Cvar Helper
+		this->m_Cvar[Name].name = Name;
+
+		// Set name
+		this->m_Cvar[Name].string = (char*)(Value);
+
+		// Set flags
+		this->m_Cvar[Name].flags = (FCVAR_PROTECTED | FCVAR_SPONLY);
+
+		// Register the variable
+		g_engfuncs.pfnCVarRegister(&this->m_Cvar[Name]);
+
+		// Get created pointer
+		Pointer = g_engfuncs.pfnCVarGetPointer(this->m_Cvar[Name].name);
+
+		// If is not null
+		if (Pointer)
+		{
+			// We can set values
+			g_engfuncs.pfnCvar_DirectSet(Pointer, Value);
 		}
 	}
-}
 
-void CAccuracyFix::PRE_Weapon_AK47(CBasePlayer* Player, CBasePlayerWeapon* Weapon)
-{
-	static int ShotsFired;
-
-	ShotsFired = (Weapon->m_iShotsFired - 1);
-
-	if (ShotsFired >= 0)
-	{
-		this->m_fAccuracy = ((ShotsFired * ShotsFired * ShotsFired) / 200.0f) + 0.35f;
-
-		if (this->m_fAccuracy > 1.25f)
-		{
-			this->m_fAccuracy = 1.25f;
-		}
-
-		Weapon->m_flAccuracy = this->m_fAccuracy;
-	}
-	else
-	{
-		if (Player->pev->flags & FL_ONGROUND)
-		{
-			if (!Player->pev->velocity[0] && !Player->pev->velocity[1])
-			{
-				if (Player->pev->flags & FL_DUCKING)
-				{
-					Weapon->m_flAccuracy = 0.0f;
-				}
-				else
-				{
-					Weapon->m_flAccuracy = 0.1f;
-				}
-			}
-			else
-			{
-				Weapon->m_flAccuracy = 0.2f;
-			}
-		}
-		else
-		{
-			Weapon->m_flAccuracy = 0.2f;
-		}
-	}
-}
-
-void CAccuracyFix::PRE_Weapon_M4A1(CBasePlayer* Player, CBasePlayerWeapon* Weapon)
-{
-	static int ShotsFired;
-
-	ShotsFired = (Weapon->m_iShotsFired - 1);
-
-	if (ShotsFired >= 0)
-	{
-		this->m_fAccuracy = ((ShotsFired * ShotsFired * ShotsFired) / 220.0f) + 0.35f;
-
-		if (this->m_fAccuracy > 1.25f)
-		{
-			this->m_fAccuracy = 1.25f;
-		}
-
-		Weapon->m_flAccuracy = this->m_fAccuracy;
-	}
-	else
-	{
-		if (Player->pev->flags & FL_ONGROUND)
-		{
-			if (!Player->pev->velocity[0] && !Player->pev->velocity[1])
-			{
-				if (Player->pev->flags & FL_DUCKING)
-				{
-					Weapon->m_flAccuracy = 0.0f;
-				}
-				else
-				{
-					Weapon->m_flAccuracy = 0.1f;
-				}
-			}
-			else
-			{
-				Weapon->m_flAccuracy = 0.2f;
-			}
-		}
-		else
-		{
-			Weapon->m_flAccuracy = 0.2f;
-		}
-	}
+	return Pointer;
 }

@@ -33,7 +33,7 @@ C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS* pFunctionTable, int* interface
 
 void DLL_POST_ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 {
-	gLowFpsSpreadCoolDownFix.ServerActivate();
+	gAccuracyFix.ServerActivate();
 
 	RETURN_META(MRES_IGNORED);
 }

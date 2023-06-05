@@ -81,7 +81,7 @@ bool ReGameDLL_Init()
 
 	g_ReGameHookchains->InstallGameRules()->registerHook(ReGameDLL_InstallGameRules);
 
-	g_ReGameHookchains->CBasePlayer_SetAnimation()->registerHook(ReGameDLL_CBasePlayer_SetAnimation);
+	g_ReGameHookchains->CBasePlayer_PostThink()->registerHook(ReGameDLL_CBasePlayer_PostThink);
 
 	return true;
 }
@@ -90,7 +90,7 @@ bool ReGameDLL_Stop()
 {
 	g_ReGameHookchains->InstallGameRules()->unregisterHook(ReGameDLL_InstallGameRules);
 
-	g_ReGameHookchains->CBasePlayer_SetAnimation()->unregisterHook(ReGameDLL_CBasePlayer_SetAnimation);
+	g_ReGameHookchains->CBasePlayer_PostThink()->unregisterHook(ReGameDLL_CBasePlayer_PostThink);
 
 	return true;
 }
@@ -111,11 +111,11 @@ CGameRules *ReGameDLL_InstallGameRules(IReGameHook_InstallGameRules *chain)
 	return gamerules;
 }
 
-void ReGameDLL_CBasePlayer_SetAnimation(IReGameHook_CBasePlayer_SetAnimation* chain, CBasePlayer* pthis, PLAYER_ANIM playerAnim)
+void ReGameDLL_CBasePlayer_PostThink(IReGameHook_CBasePlayer_PostThink* chain, CBasePlayer* pthis)
 {
-	gAccuracyFix.PRE_SetAnimation(pthis, playerAnim);
+	gAccuracyFixPunch.PRE_CBasePlayer_PostThink(pthis);
 
-	chain->callNext(pthis, playerAnim);
+	chain->callNext(pthis);
 
-	gAccuracyFix.POST_SetAnimation(pthis, playerAnim);
+	gAccuracyFixPunch.POST_CBasePlayer_PostThink(pthis);
 }

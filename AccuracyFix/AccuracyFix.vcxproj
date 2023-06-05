@@ -15,7 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AccuracyFix.cpp" />
-    <ClCompile Include="LowFpsSpreadCoolDownFix.cpp" />
     <ClCompile Include="MetaDLL.cpp" />
     <ClCompile Include="MetaEngine.cpp" />
     <ClCompile Include="MetaMod.cpp" />
@@ -23,16 +22,17 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="AccuracyFixControl.cpp" />
     <ClCompile Include="ReAPI.cpp" />
     <ClCompile Include="ReGameDLL.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AccuracyFix.h" />
-    <ClInclude Include="LowFpsSpreadCoolDownFix.h" />
     <ClInclude Include="MetaDLL.h" />
     <ClInclude Include="MetaEngine.h" />
     <ClInclude Include="MetaMod.h" />
     <ClInclude Include="precompiled.h" />
+    <ClInclude Include="AccuracyFixControl.h" />
     <ClInclude Include="ReAPI.h" />
     <ClInclude Include="ReGameDLL.h" />
   </ItemGroup>
@@ -91,6 +91,9 @@
       <ModuleDefinitionFile>AccuracyFix.def</ModuleDefinitionFile>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>.\PostCompile.bat</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -111,6 +114,9 @@
       <ModuleDefinitionFile>AccuracyFix.def</ModuleDefinitionFile>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>.\PostCompile.bat</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

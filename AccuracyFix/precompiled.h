@@ -60,4 +60,4 @@
 
 // Accuracy Fix
 #include "AccuracyFix.h"
-#include "LowFpsSpreadCoolDownFix.h"
+#include "AccuracyFixControl.h"

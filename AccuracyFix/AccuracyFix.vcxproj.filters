@@ -25,8 +25,8 @@
     <Filter Include="ReGameDLL">
       <UniqueIdentifier>{3a2f7dd5-133f-41d5-b627-5e16bbe5f958}</UniqueIdentifier>
     </Filter>
-    <Filter Include="AccuracyFix\LowFpsSpreadCoolDownFix">
-      <UniqueIdentifier>{6b4f18b6-6bd4-4907-b950-c19c79138020}</UniqueIdentifier>
+    <Filter Include="AccuracyFix\AccuracyFixControl">
+      <UniqueIdentifier>{e03fd959-f9da-4550-b298-98b510223f02}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -56,8 +56,8 @@
     <ClCompile Include="ReGameDLL.cpp">
       <Filter>ReGameDLL</Filter>
     </ClCompile>
-    <ClCompile Include="LowFpsSpreadCoolDownFix.cpp">
-      <Filter>AccuracyFix\LowFpsSpreadCoolDownFix</Filter>
+    <ClCompile Include="AccuracyFixControl.cpp">
+      <Filter>AccuracyFix\AccuracyFixControl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -82,8 +82,8 @@
     <ClInclude Include="ReGameDLL.h">
       <Filter>ReGameDLL</Filter>
     </ClInclude>
-    <ClInclude Include="LowFpsSpreadCoolDownFix.h">
-      <Filter>AccuracyFix\LowFpsSpreadCoolDownFix</Filter>
+    <ClInclude Include="AccuracyFixControl.h">
+      <Filter>AccuracyFix\AccuracyFixControl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
