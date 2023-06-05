@@ -113,9 +113,13 @@ CGameRules *ReGameDLL_InstallGameRules(IReGameHook_InstallGameRules *chain)
 
 void ReGameDLL_CBasePlayer_PostThink(IReGameHook_CBasePlayer_PostThink* chain, CBasePlayer* pthis)
 {
+	gAccuracyFixAttack.PRE_CBasePlayer_PostThink(pthis);
+
 	gAccuracyFixPunch.PRE_CBasePlayer_PostThink(pthis);
 
 	chain->callNext(pthis);
+
+	gAccuracyFixAttack.POST_CBasePlayer_PostThink(pthis);
 
 	gAccuracyFixPunch.POST_CBasePlayer_PostThink(pthis);
 }
