@@ -4,6 +4,10 @@ CAccuracyFix gAccuracyFix;
 
 void CAccuracyFix::ServerActivate()
 {
+	//
+	this->m_AF_PunchControl_All = this->CvarRegister("af_punch_weapon_all", "-1.0");
+	//
+	//
 	for (int WeaponID = WEAPON_P228; WeaponID <= WEAPON_P90; WeaponID++)
 	{
 		auto SlotInfo = g_ReGameApi->GetWeaponSlot((WeaponIdType)WeaponID);
