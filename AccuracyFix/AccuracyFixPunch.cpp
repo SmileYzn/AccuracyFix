@@ -12,7 +12,7 @@ void CAccuracyFixPunch::PRE_CBasePlayer_PostThink(CBasePlayer* Player)
 			{
 				if (Player->CSPlayer()->m_bCanShootOverride || (Player->m_bCanShoot && g_pGameRules->IsMultiplayer() && !g_pGameRules->IsFreezePeriod() && !Player->m_bIsDefusing) || !g_pGameRules->IsMultiplayer())
 				{
-					if (gAccuracyFix.m_AF_PunchControl[Player->m_pActiveItem->m_iId]->value >= 0.0f)
+					if (gAccuracyFix.m_AF_PunchControl_All->value >= 0.0f || gAccuracyFix.m_AF_PunchControl[Player->m_pActiveItem->m_iId]->value >= 0.0f)
 					{
 						this->m_vecPunchAngle[Player->entindex()] = Player->edict()->v.punchangle;
 					}
