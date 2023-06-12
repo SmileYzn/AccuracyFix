@@ -17,61 +17,61 @@ void CAccuracyFix::CmdEnd(const edict_t* player)
 	}
 }
 
-void CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
+bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
 	auto Player = UTIL_PlayerByIndexSafe(ENTINDEX(pentToSkip));
 
 	if (Player)
 	{
-		if (!Player->IsBot() && Player->m_pActiveItem)
+		if (Player->IsPlayer() && !Player->IsBot() && Player->IsAlive())
 		{
-			auto EntityIndex = Player->entindex();
-
-			if (Player->IsAlive() && !((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)) && fNoMonsters == IGNORE_MONSTERS::dont_ignore_monsters && (abs(this->m_Player[EntityIndex].m_LastFired - Player->m_flLastFired) >= 1.0f))
+			if (Player->m_pActiveItem)
 			{
-				bool IsShotGun = ((BIT(WEAPON_XM1014) | BIT(WEAPON_M3)) & BIT(Player->m_pActiveItem->m_iId));
+				auto EntityIndex = Player->entindex();
 
-				this->m_Player[EntityIndex].m_TM = this->m_Player[EntityIndex].m_Body;
-
-				/*if (aim_shotgun_ac_map_ents)
+				if ((fNoMonsters == IGNORE_MONSTERS::dont_ignore_monsters) && !((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)) && (abs(this->m_Player[EntityIndex].m_LastFired - Player->m_flLastFired) >= 1.0f))
 				{
-					this->m_Player[EntityIndex].m_TM = this->m_Player[EntityIndex].m_Target;
-				}*/
+					bool IsWeaponShotGun = ((BIT(WEAPON_XM1014) | BIT(WEAPON_M3)) & BIT(Player->m_pActiveItem->m_iId));
 
-				if (!IsShotGun || (IsShotGun && this->GetUserAiming(pentToSkip, &this->m_Player[EntityIndex].m_Target, &this->m_Player[EntityIndex].m_Body, 2000) && this->m_Player[EntityIndex].m_TM))
-				{
-					vec3_t vEnd;
-
-					g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
-
-					if (IsShotGun)
-					{
-						vEnd = gpGlobals->v_forward * 2020.0f;
-					}
-					else 
-					{
-						vEnd = gpGlobals->v_forward * 9999.0f;
-					}
-
-					vEnd[0] = start[0] + vEnd[0];
-
-					vEnd[1] = start[1] + vEnd[1];
-
-					vEnd[2] = start[2] + vEnd[2];
-
-					g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
-
-					this->m_Player[EntityIndex].m_Shooting = true;
+					this->m_Player[EntityIndex].m_TM = this->m_Player[EntityIndex].m_Body;
 
 					this->m_Player[EntityIndex].m_PunchAngle = Player->edict()->v.punchangle;
+
+					if (!IsWeaponShotGun || (IsWeaponShotGun && this->GetUserAiming(pentToSkip, &this->m_Player[EntityIndex].m_Target, &this->m_Player[EntityIndex].m_Body, 2000) && this->m_Player[EntityIndex].m_TM))
+					{
+						vec3_t vEnd;
+
+						g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
+
+						if (IsWeaponShotGun)
+						{
+							vEnd = gpGlobals->v_forward * 2020.0f;
+						}
+						else
+						{
+							vEnd = gpGlobals->v_forward * 9999.0f;
+						}
+
+						vEnd[0] = start[0] + vEnd[0];
+
+						vEnd[1] = start[1] + vEnd[1];
+
+						vEnd[2] = start[2] + vEnd[2];
+
+						g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
+
+						return true;
+					}
+				}
+				else
+				{
+					this->m_Player[EntityIndex].m_Shooting = false;
 				}
 			}
-			else
-			{
-				this->m_Player[EntityIndex].m_Shooting = false;
-			} 
 		}
 	}
+
+	return false;
 }
 
 void CAccuracyFix::POST_CBasePlayer_PostThink(CBasePlayer* Player)

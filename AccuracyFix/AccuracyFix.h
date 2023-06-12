@@ -16,7 +16,7 @@ public:
 	void ServerActivate();
 
 	void CmdEnd(const edict_t* player);
-	void TraceLine(const float* starn, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr);
+	bool TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr);
     void POST_CBasePlayer_PostThink(CBasePlayer* Player);
     float GetUserAiming(edict_t* edict, int* cpId, int* cpBody, float distance);
 
