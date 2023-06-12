@@ -25,12 +25,6 @@
     <Filter Include="ReGameDLL">
       <UniqueIdentifier>{3a2f7dd5-133f-41d5-b627-5e16bbe5f958}</UniqueIdentifier>
     </Filter>
-    <Filter Include="AccuracyFix\AccuracyFixAttack">
-      <UniqueIdentifier>{92fbc49b-883b-4472-91b6-2fb2f960bd8a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="AccuracyFix\AccuracyFixPunch">
-      <UniqueIdentifier>{e03fd959-f9da-4550-b298-98b510223f02}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="AccuracyFix.def">
@@ -59,12 +53,6 @@
     <ClCompile Include="ReGameDLL.cpp">
       <Filter>ReGameDLL</Filter>
     </ClCompile>
-    <ClCompile Include="AccuracyFixPunch.cpp">
-      <Filter>AccuracyFix\AccuracyFixPunch</Filter>
-    </ClCompile>
-    <ClCompile Include="AccuracyFixAttack.cpp">
-      <Filter>AccuracyFix\AccuracyFixAttack</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="precompiled.h">
@@ -87,12 +75,6 @@
     </ClInclude>
     <ClInclude Include="ReGameDLL.h">
       <Filter>ReGameDLL</Filter>
-    </ClInclude>
-    <ClInclude Include="AccuracyFixPunch.h">
-      <Filter>AccuracyFix\AccuracyFixPunch</Filter>
-    </ClInclude>
-    <ClInclude Include="AccuracyFixAttack.h">
-      <Filter>AccuracyFix\AccuracyFixAttack</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

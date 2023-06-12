@@ -26,8 +26,17 @@ C_DLLEXPORT int GetEngineFunctions_Post(enginefuncs_t* pengfuncsFromEngine, int*
 
 	// Register Functions Here //
 
+	gENGINE_FunctionTable_Post.pfnTraceLine = ENGINE_POST_TraceLine;
+
 	memcpy(pengfuncsFromEngine, &gENGINE_FunctionTable_Post, sizeof(enginefuncs_t));
 
 	return 1;
+}
+
+void ENGINE_POST_TraceLine(const float* v1, const float* v2, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
+{
+	gAccuracyFix.TraceLine(v1, v2, fNoMonsters, pentToSkip, ptr);
+
+	RETURN_META(MRES_IGNORED);
 }
 #pragma endregion

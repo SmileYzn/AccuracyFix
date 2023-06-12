@@ -60,5 +60,3 @@
 
 // Accuracy Fix
 #include "AccuracyFix.h"
-#include "AccuracyFixAttack.h"
-#include "AccuracyFixPunch.h"

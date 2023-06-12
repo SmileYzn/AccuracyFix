@@ -1,6 +1,7 @@
 #pragma once
 
 #pragma region DLL_PRE
+void DLL_PRE_CmdEnd(const edict_t* player);
 #pragma endregion
 
 #pragma region DLL_POST

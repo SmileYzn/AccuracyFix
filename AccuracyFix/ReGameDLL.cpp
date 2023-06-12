@@ -79,7 +79,7 @@ bool ReGameDLL_Init()
 
 	LOG_CONSOLE(PLID, "[%s] Re-GameDLL API successfully initialized.", Plugin_info.logtag);
 
-	g_ReGameHookchains->InstallGameRules()->registerHook(ReGameDLL_InstallGameRules);
+	//g_ReGameHookchains->InstallGameRules()->registerHook(ReGameDLL_InstallGameRules);
 
 	g_ReGameHookchains->CBasePlayer_PostThink()->registerHook(ReGameDLL_CBasePlayer_PostThink);
 
@@ -88,7 +88,7 @@ bool ReGameDLL_Init()
 
 bool ReGameDLL_Stop()
 {
-	g_ReGameHookchains->InstallGameRules()->unregisterHook(ReGameDLL_InstallGameRules);
+	//g_ReGameHookchains->InstallGameRules()->unregisterHook(ReGameDLL_InstallGameRules);
 
 	g_ReGameHookchains->CBasePlayer_PostThink()->unregisterHook(ReGameDLL_CBasePlayer_PostThink);
 
@@ -113,13 +113,15 @@ CGameRules *ReGameDLL_InstallGameRules(IReGameHook_InstallGameRules *chain)
 
 void ReGameDLL_CBasePlayer_PostThink(IReGameHook_CBasePlayer_PostThink* chain, CBasePlayer* pthis)
 {
-	gAccuracyFixAttack.PRE_CBasePlayer_PostThink(pthis);
+	//gAccuracyFixAttack.PRE_CBasePlayer_PostThink(pthis);
 
-	gAccuracyFixPunch.PRE_CBasePlayer_PostThink(pthis);
+	//gAccuracyFixPunch.PRE_CBasePlayer_PostThink(pthis);
 
 	chain->callNext(pthis);
 
-	gAccuracyFixAttack.POST_CBasePlayer_PostThink(pthis);
+	//gAccuracyFixAttack.POST_CBasePlayer_PostThink(pthis);
 
-	gAccuracyFixPunch.POST_CBasePlayer_PostThink(pthis);
+	//gAccuracyFixPunch.POST_CBasePlayer_PostThink(pthis);
+
+	gAccuracyFix.POST_CBasePlayer_PostThink(pthis); 
 }
