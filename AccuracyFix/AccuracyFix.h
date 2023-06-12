@@ -2,7 +2,7 @@
 
 typedef struct S_USER_DATA
 {
-    float  m_LastFired[2];
+    float  m_LastFired;
     vec3_t m_PunchAngle;
     bool  m_Shooting;
     int   m_TM;

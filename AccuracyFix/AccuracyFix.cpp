@@ -13,23 +13,21 @@ void CAccuracyFix::CmdEnd(const edict_t* player)
 
 	if (Player)
 	{
-		this->m_Player[Player->entindex()].m_LastFired[0] = Player->m_flLastFired;
+		this->m_Player[Player->entindex()].m_LastFired = Player->m_flLastFired;
 	}
 }
 
 void CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
-	auto EntityIndex = ENTINDEX(pentToSkip);
-
-	auto Player = UTIL_PlayerByIndexSafe(EntityIndex);
+	auto Player = UTIL_PlayerByIndexSafe(ENTINDEX(pentToSkip));
 
 	if (Player)
 	{
 		if (!Player->IsBot() && Player->m_pActiveItem)
 		{
-			this->m_Player[Player->entindex()].m_LastFired[1] = Player->m_flLastFired;
+			auto EntityIndex = Player->entindex();
 
-			if (Player->IsAlive() && !((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)) && fNoMonsters == IGNORE_MONSTERS::dont_ignore_monsters && (abs(this->m_Player[EntityIndex].m_LastFired[0] - this->m_Player[EntityIndex].m_LastFired[1]) >= 1.0f))
+			if (Player->IsAlive() && !((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)) && fNoMonsters == IGNORE_MONSTERS::dont_ignore_monsters && (abs(this->m_Player[EntityIndex].m_LastFired - Player->m_flLastFired) >= 1.0f))
 			{
 				bool IsShotGun = ((BIT(WEAPON_XM1014) | BIT(WEAPON_M3)) & BIT(Player->m_pActiveItem->m_iId));
 
@@ -105,7 +103,7 @@ float CAccuracyFix::GetUserAiming(edict_t* edict, int* cpId, int* cpBody, float 
 
 	auto Entityindex = ENTINDEX(edict);
 
-	if (Entityindex > 0 && Entityindex <= gpGlobals->maxClients)
+	if (Entityindex >= 1 && Entityindex <= gpGlobals->maxClients)
 	{
 		Vector v_forward;
 
