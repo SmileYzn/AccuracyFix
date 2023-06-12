@@ -2,7 +2,7 @@
 
 typedef struct S_USER_DATA
 {
-    float  m_LastFired[2]; // If is float, is always with recoil, if is int has strange recoil
+    float  m_LastFired[2];
     vec3_t m_PunchAngle;
     bool  m_Shooting;
     int   m_TM;
@@ -18,10 +18,9 @@ public:
 	void CmdEnd(const edict_t* player);
 	void TraceLine(const float* starn, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr);
     void POST_CBasePlayer_PostThink(CBasePlayer* Player);
-
     float GetUserAiming(edict_t* edict, int* cpId, int* cpBody, float distance);
 
-	// Static data
+private:
 	std::map<int, P_USER_DATA> m_Player;
 };
 

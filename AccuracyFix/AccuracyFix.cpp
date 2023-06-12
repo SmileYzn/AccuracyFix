@@ -50,7 +50,7 @@ void CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 					{
 						vEnd = gpGlobals->v_forward * 2020.0f;
 					}
-					else
+					else 
 					{
 						vEnd = gpGlobals->v_forward * 9999.0f;
 					}
