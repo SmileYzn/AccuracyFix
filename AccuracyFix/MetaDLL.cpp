@@ -13,16 +13,9 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
 
 	// Register Functions Here //
 
-	gDLL_FunctionTable_Pre.pfnCmdEnd = DLL_PRE_CmdEnd;
-
 	memcpy(pFunctionTable, &gDLL_FunctionTable_Pre, sizeof(DLL_FUNCTIONS));
 
 	return 1;
-}
-
-void DLL_PRE_CmdEnd(const edict_t* player)
-{
-	gAccuracyFix.CmdEnd(player);
 }
 #pragma endregion
 
@@ -32,7 +25,6 @@ C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS* pFunctionTable, int* interface
 	memset(&gDLL_FunctionTable_Post, 0, sizeof(DLL_FUNCTIONS));
 
 	// Register Functions Here //
-
 	gDLL_FunctionTable_Post.pfnServerActivate = DLL_POST_ServerActivate;
 
 	memcpy(pFunctionTable, &gDLL_FunctionTable_Post, sizeof(DLL_FUNCTIONS));

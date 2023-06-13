@@ -7,26 +7,16 @@ void CAccuracyFix::ServerActivate()
 	this->m_Player.clear();
 }
 
-void CAccuracyFix::CmdEnd(const edict_t* player)
-{
-	auto Player = UTIL_PlayerByIndexSafe(ENTINDEX(player));
-
-	if (Player)
-	{
-		this->m_Player[Player->entindex()].m_LastFired = Player->m_flLastFired;
-	}
-}
-
 bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
 	auto Player = UTIL_PlayerByIndexSafe(ENTINDEX(pentToSkip));
 
 	if (Player)
 	{
+		auto EntityIndex = Player->entindex();
+
 		if (Player->IsAlive())
 		{
-			auto EntityIndex = Player->entindex();
-
 			if (Player->m_pActiveItem)
 			{
 				if ((fNoMonsters == IGNORE_MONSTERS::dont_ignore_monsters))
@@ -37,11 +27,9 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 
 						if (Weapon)
 						{
-							if (this->m_Player[EntityIndex].m_LastFired != Player->m_flLastFired)
+							if (!Weapon->m_iShotsFired || (gpGlobals->time >= Weapon->m_flNextPrimaryAttack))
 							{
 								this->m_Player[EntityIndex].m_Shooting++;
-
-								this->m_Player[EntityIndex].m_LastFired = Player->m_flLastFired;
 
 								bool IsWeaponShotGun = ((BIT(WEAPON_XM1014) | BIT(WEAPON_M3)) & BIT(Player->m_pActiveItem->m_iId));
 
