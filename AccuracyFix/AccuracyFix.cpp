@@ -4,7 +4,7 @@ CAccuracyFix gAccuracyFix;
 
 void CAccuracyFix::ServerActivate()
 {
-	this->m_Player.clear();
+	memset(this->m_Shooting, 0, sizeof(m_Shooting));
 }
 
 bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
@@ -21,45 +21,31 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 			{
 				if ((fNoMonsters == IGNORE_MONSTERS::dont_ignore_monsters))
 				{
-					if (!((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)))
+					if (!((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_XM1014) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_M3) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)))
 					{
 						CBasePlayerWeapon* Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
 
 						if (Weapon)
 						{
-							if (!Weapon->m_iShotsFired || (gpGlobals->time >= Weapon->m_flNextPrimaryAttack))
+							if (Weapon->m_flNextPrimaryAttack < 0.0f)
 							{
-								this->m_Player[EntityIndex].m_Shooting++;
+								this->m_Shooting[EntityIndex]++;
 
-								bool IsWeaponShotGun = ((BIT(WEAPON_XM1014) | BIT(WEAPON_M3)) & BIT(Player->m_pActiveItem->m_iId));
+								vec3_t vEnd;
 
-								this->m_Player[EntityIndex].m_TM = this->m_Player[EntityIndex].m_Body;
+								g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
 
-								if (!IsWeaponShotGun || (IsWeaponShotGun && this->GetUserAiming(pentToSkip, &this->m_Player[EntityIndex].m_Target, &this->m_Player[EntityIndex].m_Body, 2000) && this->m_Player[EntityIndex].m_TM))
-								{
-									vec3_t vEnd;
+								vEnd = gpGlobals->v_forward * 9999.0f;
 
-									g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
+								vEnd[0] = start[0] + vEnd[0];
 
-									if (IsWeaponShotGun)
-									{
-										vEnd = gpGlobals->v_forward * 2020.0f;
-									}
-									else
-									{
-										vEnd = gpGlobals->v_forward * 9999.0f;
-									}
+								vEnd[1] = start[1] + vEnd[1];
 
-									vEnd[0] = start[0] + vEnd[0];
+								vEnd[2] = start[2] + vEnd[2];
 
-									vEnd[1] = start[1] + vEnd[1];
+								g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
 
-									vEnd[2] = start[2] + vEnd[2];
-
-									g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
-
-									return true;
-								}
+								return true;
 							}
 						}
 					}
@@ -83,9 +69,9 @@ void CAccuracyFix::POST_CBasePlayer_PostThink(CBasePlayer* Player)
 			{
 				auto EntityIndex = Player->entindex();
 
-				if (this->m_Player[EntityIndex].m_Shooting > 0)
+				if (this->m_Shooting[EntityIndex] > 0)
 				{
-					this->m_Player[EntityIndex].m_Shooting = 0;
+					this->m_Shooting[EntityIndex] = 0;
 
 					auto PunchAngle = Player->edict()->v.punchangle;
 
@@ -96,43 +82,4 @@ void CAccuracyFix::POST_CBasePlayer_PostThink(CBasePlayer* Player)
 			}
 		}
 	}
-}
-
-float CAccuracyFix::GetUserAiming(edict_t* edict, int* cpId, int* cpBody, float distance)
-{
-	float pFloat = 0.0f;
-
-	auto Entityindex = ENTINDEX(edict);
-
-	if (Entityindex > 0 && Entityindex <= gpGlobals->maxClients)
-	{
-		Vector v_forward;
-
-		Vector v_src = edict->v.origin + edict->v.view_ofs;
-
-		g_engfuncs.pfnAngleVectors(edict->v.v_angle, v_forward, NULL, NULL);
-
-		TraceResult trEnd;
-
-		Vector v_dest = v_src + v_forward * distance;
-
-		g_engfuncs.pfnTraceLine(v_src, v_dest, 0, edict, &trEnd);
-
-		*cpId = FNullEnt(trEnd.pHit) ? 0 : ENTINDEX(trEnd.pHit);
-
-		*cpBody = trEnd.iHitgroup;
-
-		if (trEnd.flFraction < 1.0f)
-		{
-			pFloat = (trEnd.vecEndPos - v_src).Length();
-		}
-
-		return pFloat;
-	}
-
-	*cpId = 0;
-
-	*cpBody = 0;
-
-	return pFloat;
 }
