@@ -2,12 +2,11 @@
 
 typedef struct S_USER_DATA
 {
-    float  m_LastFired;
-    vec3_t m_PunchAngle;
-    bool  m_Shooting;
-    int   m_TM;
-    int   m_Body;
-    int   m_Target;
+    float   m_LastFired;
+    int     m_Shooting;
+    int     m_TM;
+    int     m_Body;
+    int     m_Target;
 } P_USER_DATA, *LP_USER_DATA;
 
 class CAccuracyFix

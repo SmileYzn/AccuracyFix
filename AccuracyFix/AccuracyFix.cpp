@@ -23,49 +23,58 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 
 	if (Player)
 	{
-		if (Player->IsPlayer() && !Player->IsBot() && Player->IsAlive())
+		if (Player->IsAlive())
 		{
+			auto EntityIndex = Player->entindex();
+
 			if (Player->m_pActiveItem)
 			{
-				auto EntityIndex = Player->entindex();
-
-				if ((fNoMonsters == IGNORE_MONSTERS::dont_ignore_monsters) && !((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)) && (abs(this->m_Player[EntityIndex].m_LastFired - Player->m_flLastFired) >= 1.0f))
+				if ((fNoMonsters == IGNORE_MONSTERS::dont_ignore_monsters))
 				{
-					bool IsWeaponShotGun = ((BIT(WEAPON_XM1014) | BIT(WEAPON_M3)) & BIT(Player->m_pActiveItem->m_iId));
-
-					this->m_Player[EntityIndex].m_TM = this->m_Player[EntityIndex].m_Body;
-
-					this->m_Player[EntityIndex].m_PunchAngle = Player->edict()->v.punchangle;
-
-					if (!IsWeaponShotGun || (IsWeaponShotGun && this->GetUserAiming(pentToSkip, &this->m_Player[EntityIndex].m_Target, &this->m_Player[EntityIndex].m_Body, 2000) && this->m_Player[EntityIndex].m_TM))
+					if (!((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)))
 					{
-						vec3_t vEnd;
+						CBasePlayerWeapon* Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
 
-						g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
-
-						if (IsWeaponShotGun)
+						if (Weapon)
 						{
-							vEnd = gpGlobals->v_forward * 2020.0f;
+							if (this->m_Player[EntityIndex].m_LastFired != Player->m_flLastFired)
+							{
+								this->m_Player[EntityIndex].m_Shooting++;
+
+								this->m_Player[EntityIndex].m_LastFired = Player->m_flLastFired;
+
+								bool IsWeaponShotGun = ((BIT(WEAPON_XM1014) | BIT(WEAPON_M3)) & BIT(Player->m_pActiveItem->m_iId));
+
+								this->m_Player[EntityIndex].m_TM = this->m_Player[EntityIndex].m_Body;
+
+								if (!IsWeaponShotGun || (IsWeaponShotGun && this->GetUserAiming(pentToSkip, &this->m_Player[EntityIndex].m_Target, &this->m_Player[EntityIndex].m_Body, 2000) && this->m_Player[EntityIndex].m_TM))
+								{
+									vec3_t vEnd;
+
+									g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
+
+									if (IsWeaponShotGun)
+									{
+										vEnd = gpGlobals->v_forward * 2020.0f;
+									}
+									else
+									{
+										vEnd = gpGlobals->v_forward * 9999.0f;
+									}
+
+									vEnd[0] = start[0] + vEnd[0];
+
+									vEnd[1] = start[1] + vEnd[1];
+
+									vEnd[2] = start[2] + vEnd[2];
+
+									g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
+
+									return true;
+								}
+							}
 						}
-						else
-						{
-							vEnd = gpGlobals->v_forward * 9999.0f;
-						}
-
-						vEnd[0] = start[0] + vEnd[0];
-
-						vEnd[1] = start[1] + vEnd[1];
-
-						vEnd[2] = start[2] + vEnd[2];
-
-						g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
-
-						return true;
 					}
-				}
-				else
-				{
-					this->m_Player[EntityIndex].m_Shooting = false;
 				}
 			}
 		}
@@ -76,23 +85,27 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 
 void CAccuracyFix::POST_CBasePlayer_PostThink(CBasePlayer* Player)
 {
-	if (!Player->IsBot())
+	if (Player->IsAlive())
 	{
-		auto EntityIndex = Player->entindex();
-
-		if (this->m_Player[EntityIndex].m_Shooting)
+		if (Player->m_pActiveItem)
 		{
-			auto PunchAngle = Player->edict()->v.punchangle;
+			CBasePlayerWeapon* Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
 
-			PunchAngle = PunchAngle - this->m_Player[EntityIndex].m_PunchAngle;
+			if (Weapon)
+			{
+				auto EntityIndex = Player->entindex();
 
-			PunchAngle = PunchAngle * 0.237f;
+				if (this->m_Player[EntityIndex].m_Shooting > 0)
+				{
+					this->m_Player[EntityIndex].m_Shooting = 0;
 
-			PunchAngle = PunchAngle + this->m_Player[EntityIndex].m_PunchAngle;
+					auto PunchAngle = Player->edict()->v.punchangle;
 
-			Player->edict()->v.punchangle = PunchAngle;
+					PunchAngle = PunchAngle * Weapon->m_flAccuracy;
 
-			this->m_Player[EntityIndex].m_Shooting = false;
+					Player->edict()->v.punchangle = PunchAngle;
+				}
+			}
 		}
 	}
 }
@@ -103,7 +116,7 @@ float CAccuracyFix::GetUserAiming(edict_t* edict, int* cpId, int* cpBody, float 
 
 	auto Entityindex = ENTINDEX(edict);
 
-	if (Entityindex >= 1 && Entityindex <= gpGlobals->maxClients)
+	if (Entityindex > 0 && Entityindex <= gpGlobals->maxClients)
 	{
 		Vector v_forward;
 
@@ -121,7 +134,7 @@ float CAccuracyFix::GetUserAiming(edict_t* edict, int* cpId, int* cpBody, float 
 
 		*cpBody = trEnd.iHitgroup;
 
-		if (trEnd.flFraction < 1.0)
+		if (trEnd.flFraction < 1.0f)
 		{
 			pFloat = (trEnd.vecEndPos - v_src).Length();
 		}
@@ -130,6 +143,7 @@ float CAccuracyFix::GetUserAiming(edict_t* edict, int* cpId, int* cpBody, float 
 	}
 
 	*cpId = 0;
+
 	*cpBody = 0;
 
 	return pFloat;
