@@ -27,6 +27,8 @@ C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS* pFunctionTable, int* interface
 	// Register Functions Here //
 	gDLL_FunctionTable_Post.pfnServerActivate = DLL_POST_ServerActivate;
 
+	gDLL_FunctionTable_Post.pfnCmdEnd = DLL_POST_CmdEnd;
+
 	memcpy(pFunctionTable, &gDLL_FunctionTable_Post, sizeof(DLL_FUNCTIONS));
 
 	return 1;
@@ -37,5 +39,10 @@ void DLL_POST_ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 	gAccuracyFix.ServerActivate();
 
 	RETURN_META(MRES_IGNORED);
+}
+
+void DLL_POST_CmdEnd(const edict_t* player)
+{
+	gAccuracyFix.CmdEnd(player);
 }
 #pragma endregion

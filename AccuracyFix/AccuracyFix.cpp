@@ -7,6 +7,17 @@ void CAccuracyFix::ServerActivate()
 	memset(this->m_Shooting, 0, sizeof(m_Shooting));
 }
 
+void CAccuracyFix::CmdEnd(const edict_t* pEdict)
+{
+	auto Player = UTIL_PlayerByIndexSafe(ENTINDEX(pEdict));
+
+	if (Player)
+	{
+		this->m_LastFired[Player->entindex()] = Player->m_flLastFired;
+	}
+}
+
+
 bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
 	auto Player = UTIL_PlayerByIndexSafe(ENTINDEX(pentToSkip));
@@ -27,9 +38,11 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 
 						if (Weapon)
 						{
-							if (Weapon->m_flNextPrimaryAttack < 0.0f)
+							if ((Player->m_flLastFired - this->m_LastFired[EntityIndex]) > 0.0f)
 							{
 								this->m_Shooting[EntityIndex]++;
+
+								this->m_LastFired[EntityIndex] = Player->m_flLastFired;
 
 								vec3_t vEnd;
 
