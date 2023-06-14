@@ -27,11 +27,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="AccuracyFix.def">
-      <Filter>AccuracyFix</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="precompiled.cpp">
       <Filter>MetaMod\Precompiled</Filter>
     </ClCompile>
@@ -76,5 +71,10 @@
     <ClInclude Include="ReGameDLL.h">
       <Filter>ReGameDLL</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="AccuracyFix.def">
+      <Filter>AccuracyFix</Filter>
+    </None>
   </ItemGroup>
 </Project>

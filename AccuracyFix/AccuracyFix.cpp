@@ -4,19 +4,8 @@ CAccuracyFix gAccuracyFix;
 
 void CAccuracyFix::ServerActivate()
 {
-	memset(this->m_Shooting, 0, sizeof(m_Shooting));
+	memset(this->m_Shooting, false, sizeof(m_Shooting));
 }
-
-void CAccuracyFix::CmdEnd(const edict_t* pEdict)
-{
-	auto Player = UTIL_PlayerByIndexSafe(ENTINDEX(pEdict));
-
-	if (Player)
-	{
-		this->m_LastFired[Player->entindex()] = Player->m_flLastFired;
-	}
-}
-
 
 bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
@@ -24,21 +13,19 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 
 	if (Player)
 	{
-		auto EntityIndex = Player->entindex();
-
-		if (Player->IsAlive())
+		if (fNoMonsters == dont_ignore_monsters)
 		{
 			if (Player->m_pActiveItem)
 			{
-				if ((fNoMonsters == IGNORE_MONSTERS::dont_ignore_monsters))
+				if (!((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_XM1014) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_M3) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)))
 				{
-					if (!((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_XM1014) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_M3) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)))
-					{
-						if ((Player->m_flLastFired - this->m_LastFired[EntityIndex]) > 0.9f)
-						{
-							this->m_Shooting[EntityIndex] = true;
+					CBasePlayerWeapon* Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
 
-							this->m_LastFired[EntityIndex] = Player->m_flLastFired;
+					if (Weapon)
+					{
+						if ((Weapon->m_iShotsFired > 0 && Weapon->m_iShotsFired <= 2) && (Weapon->m_flNextPrimaryAttack < 0.0f))
+						{
+							this->m_Shooting[Player->entindex()] = true;
 
 							vec3_t vEnd;
 
@@ -65,9 +52,9 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 	return false;
 }
 
-void CAccuracyFix::POST_CBasePlayer_PostThink(CBasePlayer* Player)
+void CAccuracyFix::PostThink(CBasePlayer* Player)
 {
-	if (Player->IsAlive())
+	if (Player->IsAlive() && Player->IsPlayer() && !Player->IsBot())
 	{
 		if (Player->m_pActiveItem)
 		{

@@ -10,4 +10,3 @@ extern bool ReGameDLL_Stop();
 
 CGameRules *ReGameDLL_InstallGameRules(IReGameHook_InstallGameRules* chain);
 void ReGameDLL_CBasePlayer_PostThink(IReGameHook_CBasePlayer_PostThink* chain, CBasePlayer* pthis);
-void ReGameDLL_CBasePlayer_SetAnimation(IReGameHook_CBasePlayer_SetAnimation* chain, CBasePlayer* pthis, PLAYER_ANIM playerAnim);

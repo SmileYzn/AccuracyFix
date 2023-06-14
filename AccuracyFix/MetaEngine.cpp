@@ -32,9 +32,9 @@ C_DLLEXPORT int GetEngineFunctions_Post(enginefuncs_t* pengfuncsFromEngine, int*
 	return 1;
 }
 
-void ENGINE_POST_TraceLine(const float* v1, const float* v2, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
+void ENGINE_POST_TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
-	gAccuracyFix.TraceLine(v1, v2, fNoMonsters, pentToSkip, ptr);
+	gAccuracyFix.TraceLine(start, end, fNoMonsters, pentToSkip, ptr);
 
 	RETURN_META(MRES_IGNORED);
 }

@@ -109,5 +109,5 @@ void ReGameDLL_CBasePlayer_PostThink(IReGameHook_CBasePlayer_PostThink* chain, C
 {
 	chain->callNext(pthis);
 
-	gAccuracyFix.POST_CBasePlayer_PostThink(pthis); 
+	gAccuracyFix.PostThink(pthis); 
 }
