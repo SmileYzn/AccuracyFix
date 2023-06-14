@@ -34,7 +34,7 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 				{
 					if (!((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_XM1014) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_M3) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)))
 					{
-						if ((Player->m_flLastFired - this->m_LastFired[EntityIndex]) > 0.8f)
+						if ((Player->m_flLastFired - this->m_LastFired[EntityIndex]) > 0.9f)
 						{
 							this->m_Shooting[EntityIndex] = true;
 
