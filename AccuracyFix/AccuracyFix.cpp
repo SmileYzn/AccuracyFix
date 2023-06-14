@@ -88,7 +88,9 @@ void CAccuracyFix::POST_CBasePlayer_PostThink(CBasePlayer* Player)
 
 					auto PunchAngle = Player->edict()->v.punchangle;
 
-					PunchAngle = PunchAngle * Weapon->m_flAccuracy;
+					//PunchAngle = PunchAngle * Weapon->m_flAccuracy;
+
+					PunchAngle = PunchAngle * 0.237f;
 
 					Player->edict()->v.punchangle = PunchAngle;
 				}
