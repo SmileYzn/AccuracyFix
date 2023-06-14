@@ -10,7 +10,7 @@ public:
     void POST_CBasePlayer_PostThink(CBasePlayer* Player);
 
 private:
-	int m_Shooting[MAX_CLIENTS + 1];
+	bool  m_Shooting[MAX_CLIENTS + 1];
 	float m_LastFired[MAX_CLIENTS + 1];
 };
 

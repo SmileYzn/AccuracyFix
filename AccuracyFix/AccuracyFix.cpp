@@ -38,9 +38,9 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 
 						if (Weapon)
 						{
-							if ((Player->m_flLastFired - this->m_LastFired[EntityIndex]) > 0.0f)
+							if ((Player->m_flLastFired - this->m_LastFired[EntityIndex]) > 0.1f)
 							{
-								this->m_Shooting[EntityIndex]++;
+								this->m_Shooting[EntityIndex] = true;
 
 								this->m_LastFired[EntityIndex] = Player->m_flLastFired;
 
@@ -82,9 +82,9 @@ void CAccuracyFix::POST_CBasePlayer_PostThink(CBasePlayer* Player)
 			{
 				auto EntityIndex = Player->entindex();
 
-				if (this->m_Shooting[EntityIndex] > 0)
+				if (this->m_Shooting[EntityIndex])
 				{
-					this->m_Shooting[EntityIndex] = 0;
+					this->m_Shooting[EntityIndex] = false;
 
 					auto PunchAngle = Player->edict()->v.punchangle;
 
