@@ -23,9 +23,12 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 
 					if (Weapon)
 					{
-						if ((Weapon->m_iShotsFired > 0 && Weapon->m_iShotsFired <= 2) && (Weapon->m_flNextPrimaryAttack < 0.0f))
+						if ((Player->edict()->v.button & IN_ATTACK) && (Weapon->m_iShotsFired >= 0 && Weapon->m_iShotsFired <= 2) && (Weapon->m_flNextPrimaryAttack < 0.0f))
 						{
-							this->m_Shooting[Player->entindex()] = true;
+							if (Weapon->m_iShotsFired > 0 && Weapon->m_iShotsFired <= 2)
+							{
+								this->m_Shooting[Player->entindex()] = true;
+							}
 
 							vec3_t vEnd;
 
