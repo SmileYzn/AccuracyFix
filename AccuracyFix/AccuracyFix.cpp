@@ -46,21 +46,24 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 
 								this->m_Data[EntityIndex].ShotsFired++;
 
-								vec3_t vEnd;
+								this->m_Data[EntityIndex].m_TM = this->m_Data[EntityIndex].m_Body;
 
-								g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
+								if(this->GetUserAiming(pentToSkip, &this->m_Data[EntityIndex].m_Target, &this->m_Data[EntityIndex].m_Body, 2000) && this->m_Data[EntityIndex].m_TM)
+								{
+									Vector vEnd = Vector(0, 0, 0);
 
-								vEnd = gpGlobals->v_forward * 9999.0f;
+									g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
 
-								vEnd[0] = start[0] + vEnd[0];
+									vEnd = gpGlobals->v_forward * 9999;
 
-								vEnd[1] = start[1] + vEnd[1];
+									vEnd[0] = start[0] + vEnd[0];
+									vEnd[1] = start[1] + vEnd[1];
+									vEnd[2] = start[2] + vEnd[2];
 
-								vEnd[2] = start[2] + vEnd[2];
+									g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
 
-								g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
-
-								return true;
+									return true;
+								}
 							}
 						}
 					}
@@ -89,4 +92,43 @@ void CAccuracyFix::PostThink(CBasePlayer* Player)
 			this->m_Data[EntityIndex].ShotsFired = 0;
 		}
 	}
+}
+
+float CAccuracyFix::GetUserAiming(edict_t* edict, int* cpId, int* cpBody, float distance)
+{
+	float pFloat = 0.0f;
+
+	auto Entityindex = ENTINDEX(edict);
+
+	if (Entityindex > 0 && Entityindex <= gpGlobals->maxClients)
+	{
+		Vector v_forward;
+
+		Vector v_src = edict->v.origin + edict->v.view_ofs;
+
+		g_engfuncs.pfnAngleVectors(edict->v.v_angle, v_forward, NULL, NULL);
+
+		TraceResult trEnd;
+
+		Vector v_dest = v_src + v_forward * distance;
+
+		g_engfuncs.pfnTraceLine(v_src, v_dest, 0, edict, &trEnd);
+
+		*cpId = FNullEnt(trEnd.pHit) ? 0 : ENTINDEX(trEnd.pHit);
+
+		*cpBody = trEnd.iHitgroup;
+
+		if (trEnd.flFraction < 1.0f)
+		{
+			pFloat = (trEnd.vecEndPos - v_src).Length();
+		}
+
+		return pFloat;
+	}
+
+	*cpId = 0;
+
+	*cpBody = 0;
+
+	return pFloat;
 }
