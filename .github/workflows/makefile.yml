@@ -38,8 +38,8 @@ jobs:
         # Move released file to dlls
         mv ./AccuracyFix/Release/accuracyfix_mm.so publish/addons/accuracyfix/dlls
 
-	# Move settings file to folder
-	mv ./AccuracyFix/cstrike/addons/accuracyfix/accuracyfix.cfg publish/addons/accuracyfix/accuracyfix.cfg
+        # Move settings file to folder
+        mv ./AccuracyFix/cstrike/addons/accuracyfix/accuracyfix.cfg publish/addons/accuracyfix/accuracyfix.cfg
 
     - name: Deploy artifacts
       uses: actions/upload-artifact@v3
