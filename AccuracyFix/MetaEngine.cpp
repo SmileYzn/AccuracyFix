@@ -12,23 +12,10 @@ C_DLLEXPORT int GetEngineFunctions(enginefuncs_t* pengfuncsFromEngine, int* inte
 	memset(&gENGINE_FunctionTable_Pre, 0, sizeof(enginefuncs_t));
 
 	// Register Functions Here //
-	gENGINE_FunctionTable_Pre.pfnTraceLine = ENGINE_PRE_TraceLine;
 
 	memcpy(pengfuncsFromEngine, &gENGINE_FunctionTable_Pre, sizeof(enginefuncs_t));
 
 	return 1;
-}
-
-void ENGINE_PRE_TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
-{
-	if (gAccuracyFix.TraceLine(start, end, fNoMonsters, pentToSkip, ptr))
-	{
-		RETURN_META(MRES_SUPERCEDE);
-	}
-	else
-	{
-		RETURN_META(MRES_IGNORED);
-	}
 }
 #pragma endregion
 
@@ -38,9 +25,22 @@ C_DLLEXPORT int GetEngineFunctions_Post(enginefuncs_t* pengfuncsFromEngine, int*
 	memset(&gENGINE_FunctionTable_Post, 0, sizeof(enginefuncs_t));
 
 	// Register Functions Here //
+	gENGINE_FunctionTable_Post.pfnTraceLine = ENGINE_POST_TraceLine;
 
 	memcpy(pengfuncsFromEngine, &gENGINE_FunctionTable_Post, sizeof(enginefuncs_t));
 
 	return 1;
+}
+
+void ENGINE_POST_TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
+{
+	if (gAccuracyFix.TraceLine(start, end, fNoMonsters, pentToSkip, ptr))
+	{
+		RETURN_META(MRES_SUPERCEDE);
+	}
+	else
+	{
+		RETURN_META(MRES_IGNORED);
+	}
 }
 #pragma endregion
