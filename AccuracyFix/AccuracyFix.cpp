@@ -95,7 +95,7 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 									{
 										aimDistance = this->m_af_distance_all->value;
 									}
-
+									
 									if (this->GetUserAiming(pentToSkip, &this->m_Data[EntityIndex].m_Target, &this->m_Data[EntityIndex].m_Body, aimDistance) && this->m_Data[EntityIndex].m_TM)
 									{
 										auto fwdDistance = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
