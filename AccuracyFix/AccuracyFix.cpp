@@ -136,7 +136,7 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 
 void CAccuracyFix::PostThink(CBasePlayer* Player)
 {
-	if (Player->IsAlive() && Player->IsPlayer() && !Player->IsBot())
+	if (Player->IsAlive())
 	{
 		auto EntityIndex = Player->entindex();
 
