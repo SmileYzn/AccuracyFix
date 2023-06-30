@@ -26,7 +26,7 @@ void CAccuracyFix::ServerActivate()
 
 					Q_snprintf(cvarName, sizeof(cvarName), "af_accuracy_%s", SlotInfo->weaponName);
 
-					this->m_af_accuracy[WeaponID] = this->CvarRegister(cvarName, "9999.0");
+					this->m_af_accuracy[WeaponID] = this->CvarRegister(cvarName, "8192.0");
 
 					Q_snprintf(cvarName, sizeof(cvarName), "af_recoil_%s", SlotInfo->weaponName);
 
@@ -34,7 +34,7 @@ void CAccuracyFix::ServerActivate()
 
 					Q_snprintf(cvarName, sizeof(cvarName), "af_distance_%s", SlotInfo->weaponName);
 
-					this->m_af_distance[WeaponID] = this->CvarRegister(cvarName, "2000.0");
+					this->m_af_distance[WeaponID] = this->CvarRegister(cvarName, "8192.0");
 				}
 			}
 		}
@@ -63,7 +63,7 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 	
 	if (Player)
 	{
-		if (Player->IsAlive() && Player->IsPlayer() && !Player->IsBot())
+		if (Player->IsAlive())
 		{
 			if (fNoMonsters == dont_ignore_monsters)
 			{
@@ -98,22 +98,26 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 									
 									if (this->GetUserAiming(pentToSkip, &this->m_Data[EntityIndex].m_Target, &this->m_Data[EntityIndex].m_Body, aimDistance) && this->m_Data[EntityIndex].m_TM)
 									{
-										auto fwdDistance = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
+										auto fwdDistance = (int)this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
 
-										if (fwdDistance > 0.0f)
+										if (fwdDistance > 0)
 										{
-											if (this->m_af_accuracy_all->value > 0.0f)
+											if (this->m_af_accuracy_all->value > 0)
 											{
-												fwdDistance = this->m_af_accuracy_all->value;
+												fwdDistance = (int)this->m_af_accuracy_all->value;
 											}
 
 											g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
 
-											Vector vStart = pentToSkip->v.origin + pentToSkip->v.view_ofs;
+											Vector vEnd = Vector(0, 0, 0);
 
-											Vector vEnd = Vector((start[0] + gpGlobals->v_forward[0] * fwdDistance), (start[1] + gpGlobals->v_forward[1] * fwdDistance), (start[2] + gpGlobals->v_forward[2] * fwdDistance));
+											vEnd = gpGlobals->v_forward * fwdDistance; 
 
-											g_engfuncs.pfnTraceLine(vStart, vEnd, fNoMonsters, pentToSkip, ptr);
+											vEnd[0] = start[0] + vEnd[0];
+											vEnd[1] = start[1] + vEnd[1];
+											vEnd[2] = start[2] + vEnd[2];
+
+											g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
 
 											return true;
 										}
@@ -136,7 +140,7 @@ void CAccuracyFix::PostThink(CBasePlayer* Player)
 	{
 		auto EntityIndex = Player->entindex();
 
-		if (this->m_Data[EntityIndex].ShotsFired && this->m_Data[EntityIndex].WeaponId)
+		if ((this->m_Data[EntityIndex].ShotsFired > 0) && (this->m_Data[EntityIndex].WeaponId != WEAPON_NONE))
 		{
 			auto Recoil = this->m_af_recoil[this->m_Data[EntityIndex].WeaponId]->value;
 
