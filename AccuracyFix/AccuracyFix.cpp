@@ -98,13 +98,13 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 									
 									if (this->GetUserAiming(pentToSkip, &this->m_Data[EntityIndex].m_Target, &this->m_Data[EntityIndex].m_Body, aimDistance) && this->m_Data[EntityIndex].m_TM)
 									{
-										auto fwdDistance = (int)this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
+										auto fwdDistance = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
 
 										if (fwdDistance > 0)
 										{
 											if (this->m_af_accuracy_all->value > 0)
 											{
-												fwdDistance = (int)this->m_af_accuracy_all->value;
+												fwdDistance = this->m_af_accuracy_all->value;
 											}
 
 											g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
