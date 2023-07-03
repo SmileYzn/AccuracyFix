@@ -19,7 +19,7 @@ jobs:
       run: yes | yum -y --assumeyes makecache
 
     - name: Install build dependencies
-      run: yes | yum -y --assumeyes install @'Development Tools' libgcc.i686 glibc-devel glibc-devel.i686 libstdc++-devel libstdc++-devel.i686 wget
+      run: yes | yum -y --assumeyes install @'Development Tools' libgcc.i686 glibc-devel glibc-devel.i686 libstdc++-devel libstdc++-devel.i686 glibc-static glibc-static.i686 libstdc++-static libstdc++-static.i686 wget
 
     - name: Run build
       working-directory: ./AccuracyFix
