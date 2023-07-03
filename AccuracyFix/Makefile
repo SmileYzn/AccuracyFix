@@ -13,15 +13,7 @@ COMPILER 	= g++
 OBJECTS 	= *.cpp
 
 # Static linker 
-LINK 		= -lstdc++
-
-# Compiler version check to static linking
-RES_COMPILER_VERSION := $(shell expr "`$(COMPILER) -dumpversion`" ">=" "5")
-
-# Link static lib if compiler is newer than minimum version
-ifeq "$(RES_COMPILER_VERSION)" "1"
-    LINK += -static-libstdc++
-endif
+LINK 		= -static-libstdc++
 
 # Optional flags
 OPT_FLAGS 	= -std=gnu++11 -pipe -g0 -O3 -flto -funroll-loops -fomit-frame-pointer -fno-stack-protector -fPIC
