@@ -13,18 +13,13 @@ COMPILER 	= g++
 OBJECTS 	= *.cpp
 
 # Static linker 
-LINK 		=
+LINK 		= -static-libstdc++
 
 # Compiler version check to static linking
 RES_COMPILER_VERSION := $(shell expr "`$(COMPILER) -dumpversion`" ">=" "5")
 
-# Link static lib if compiler is newer than minimum version
-ifeq "$(RES_COMPILER_VERSION)" "1"
-    LINK += -static-libstdc++
-endif
-
 # Optional flags
-OPT_FLAGS 	= -std=gnu++11 -pipe -g0 -O3 -s -flto -funroll-loops -fomit-frame-pointer -fno-stack-protector -fPIC
+OPT_FLAGS 	= -std=gnu++11 -pipe -g0 -O3 -flto -funroll-loops -fomit-frame-pointer -fno-stack-protector -fPIC
 
 # C flags
 CFLAGS 		= $(OPT_FLAGS) -g -DNDEBUG -Dlinux -D__linux__ -D_GLIBCXX_USE_CXX11_ABI=0 -U_FORTIFY_SOURCE -m32 -msse3 -msse4.1 -shared
@@ -44,7 +39,7 @@ $(BIN_DIR)/%.o: %.c
 all:
 	mkdir -p $(BIN_DIR)
 
-	$(MAKE) $(NAME) && strip -x $(BIN_DIR)/$(NAME)_mm.so
+	$(MAKE) $(NAME)
 
 $(NAME): $(OBJ_LINUX)
 
