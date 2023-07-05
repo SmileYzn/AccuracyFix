@@ -50,7 +50,7 @@ void CAccuracyFix::CmdEnd(const edict_t* pEdict)
 
 	if (Player)
 	{
-		if (Player->IsAlive() && Player->IsPlayer() && !Player->IsBot())
+		if (Player->IsAlive())
 		{
 			this->m_Data[Player->entindex()].LastFired = Player->m_flLastFired;
 		}
