@@ -69,59 +69,52 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 			{
 				if (Player->m_pActiveItem)
 				{
-					auto EntityIndex = Player->entindex();
-
 					if (!((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)))
 					{
-						CBasePlayerWeapon* Weapon = static_cast<CBasePlayerWeapon*>(Player->m_pActiveItem);
+						auto EntityIndex = Player->entindex();
 
-						if (Weapon)
+						if ((Player->edict()->v.button & IN_ATTACK) && (Player->m_flLastFired != this->m_Data[EntityIndex].LastFired))
 						{
-							if ((Player->edict()->v.button & IN_ATTACK) && (Player->m_flLastFired != this->m_Data[EntityIndex].LastFired))
+							this->m_Data[EntityIndex].LastFired = Player->m_flLastFired;
+
+							this->m_Data[EntityIndex].WeaponId = Player->m_pActiveItem->m_iId;
+						}
+
+						int TargetIndex = 0, HitBoxPlace = 0;
+
+						auto aimDistance = this->m_af_distance[Player->m_pActiveItem->m_iId]->value;
+
+						if (this->m_af_accuracy_all->value > 0)
+						{
+							aimDistance = this->m_af_accuracy_all->value;
+						}
+
+						if (this->GetUserAiming(pentToSkip, &TargetIndex, &HitBoxPlace, aimDistance) > 0.0f)
+						{
+							if (TargetIndex && HitBoxPlace)
 							{
-								this->m_Data[EntityIndex].LastFired = Player->m_flLastFired;
+								auto fwdDistance = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
 
-								this->m_Data[EntityIndex].ShotsFired++;
-
-								this->m_Data[EntityIndex].WeaponId = Player->m_pActiveItem->m_iId;
-
-								this->m_Data[EntityIndex].m_TM = this->m_Data[EntityIndex].m_Body;
-
-								auto aimDistance = this->m_af_distance[Player->m_pActiveItem->m_iId]->value;
-
-								if (aimDistance > 0.0f)
+								if (fwdDistance > 0)
 								{
-									if (this->m_af_distance_all->value > 0.0f)
+									if (this->m_af_accuracy_all->value > 0)
 									{
-										aimDistance = this->m_af_distance_all->value;
+										fwdDistance = this->m_af_accuracy_all->value;
 									}
-									
-									if (this->GetUserAiming(pentToSkip, &this->m_Data[EntityIndex].m_Target, &this->m_Data[EntityIndex].m_Body, aimDistance) && this->m_Data[EntityIndex].m_TM)
-									{
-										auto fwdDistance = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
 
-										if (fwdDistance > 0)
-										{
-											if (this->m_af_accuracy_all->value > 0)
-											{
-												fwdDistance = this->m_af_accuracy_all->value;
-											}
+									g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
 
-											g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
+									Vector vEnd = Vector(0, 0, 0);
 
-											Vector vEnd = Vector(0, 0, 0);
+									vEnd = gpGlobals->v_forward * fwdDistance;
 
-											vEnd = gpGlobals->v_forward * fwdDistance; 
+									vEnd[0] = start[0] + vEnd[0];
+									vEnd[1] = start[1] + vEnd[1];
+									vEnd[2] = start[2] + vEnd[2];
 
-											vEnd[0] = start[0] + vEnd[0];
-											vEnd[1] = start[1] + vEnd[1];
-											vEnd[2] = start[2] + vEnd[2];
+									g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
 
-											g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
-
-											return true;
-										}
-									}
+									return true;
 								}
 							}
 						}
@@ -140,7 +133,7 @@ void CAccuracyFix::PostThink(CBasePlayer* Player)
 	{
 		auto EntityIndex = Player->entindex();
 
-		if ((this->m_Data[EntityIndex].ShotsFired > 0) && (this->m_Data[EntityIndex].WeaponId != WEAPON_NONE))
+		if (this->m_Data[EntityIndex].WeaponId != WEAPON_NONE)
 		{
 			auto Recoil = this->m_af_recoil[this->m_Data[EntityIndex].WeaponId]->value;
 
@@ -157,8 +150,6 @@ void CAccuracyFix::PostThink(CBasePlayer* Player)
 
 				Player->edict()->v.punchangle = PunchAngle;
 			}
-
-			this->m_Data[EntityIndex].ShotsFired = 0;
 
 			this->m_Data[EntityIndex].WeaponId = WEAPON_NONE;
 		}

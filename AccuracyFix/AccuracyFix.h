@@ -3,11 +3,7 @@
 typedef struct S_PLAYER_DATA
 {
 	float LastFired;
-	int   ShotsFired;
 	int	  WeaponId;
-	int   m_TM;
-	int   m_Body;
-	int   m_Target;
 } P_PLAYER_DATA, *LP_PLAYER_DATA;
 
 class CAccuracyFix
