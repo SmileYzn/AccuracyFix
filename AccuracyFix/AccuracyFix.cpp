@@ -28,7 +28,7 @@ void CAccuracyFix::ServerActivate()
 
 					Q_snprintf(cvarName, sizeof(cvarName), "af_accuracy_%s", SlotInfo->weaponName);
 
-					this->m_af_accuracy[WeaponID] = this->CvarRegister(cvarName, "3200.0");
+					this->m_af_accuracy[WeaponID] = this->CvarRegister(cvarName, "4096.0");
 
 #ifndef ACCURACY_DISABLE_RECOIL_CONTROL
 					Q_snprintf(cvarName, sizeof(cvarName), "af_recoil_%s", SlotInfo->weaponName);
@@ -38,7 +38,7 @@ void CAccuracyFix::ServerActivate()
 
 					Q_snprintf(cvarName, sizeof(cvarName), "af_distance_%s", SlotInfo->weaponName);
 
-					this->m_af_distance[WeaponID] = this->CvarRegister(cvarName, "3200.0");
+					this->m_af_distance[WeaponID] = this->CvarRegister(cvarName, "4096.0");
 				}
 			}
 		}
