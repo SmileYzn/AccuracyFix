@@ -103,18 +103,6 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 							{
 								if (HitBoxPlace)
 								{
-									if (!Player->IsBot())
-									{
-										auto Target = UTIL_PlayerByIndexSafe(TargetIndex);
-
-										if (Target)
-										{
-											auto Distance = (Player->edict()->v.origin - Target->edict()->v.origin).Length();
-
-											LOG_CONSOLE(PLID, "[%s] Distance: %f", __func__, Distance);
-										}
-									}
-
 									auto fwdDistance = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
 
 									if (fwdDistance > 0.0f)
