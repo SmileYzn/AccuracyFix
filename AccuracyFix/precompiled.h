@@ -6,7 +6,7 @@
 #endif
 
 // Disable Recoil Fix
-#define ACCURACY_DISABLE_RECOIL_CONTROL
+// #define ACCURACY_DISABLE_RECOIL_CONTROL
 
 // If is not MSVC build
 #ifndef _WIN32
