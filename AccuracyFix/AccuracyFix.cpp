@@ -4,11 +4,13 @@ CAccuracyFix gAccuracyFix;
 
 void CAccuracyFix::ServerActivate()
 {
+#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
 	this->m_Data.clear();
 
-	this->m_af_accuracy_all = this->CvarRegister("af_accuracy_all", "-1.0");
-
 	this->m_af_recoil_all = this->CvarRegister("af_recoil_all", "-1.0");
+#endif
+
+	this->m_af_accuracy_all = this->CvarRegister("af_accuracy_all", "-1.0");
 
 	this->m_af_distance_all = this->CvarRegister("af_distance_all", "-1.0");
 
@@ -18,7 +20,7 @@ void CAccuracyFix::ServerActivate()
 
 		if (SlotInfo)
 		{
-			if (SlotInfo->slot == PRIMARY_WEAPON_SLOT || SlotInfo->slot == PISTOL_SLOT)
+			if ((SlotInfo->slot == PRIMARY_WEAPON_SLOT) || (SlotInfo->slot == PISTOL_SLOT))
 			{
 				if (SlotInfo->weaponName)
 				{
@@ -26,15 +28,17 @@ void CAccuracyFix::ServerActivate()
 
 					Q_snprintf(cvarName, sizeof(cvarName), "af_accuracy_%s", SlotInfo->weaponName);
 
-					this->m_af_accuracy[WeaponID] = this->CvarRegister(cvarName, "8192.0");
+					this->m_af_accuracy[WeaponID] = this->CvarRegister(cvarName, "3200.0");
 
+#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
 					Q_snprintf(cvarName, sizeof(cvarName), "af_recoil_%s", SlotInfo->weaponName);
 
 					this->m_af_recoil[WeaponID] = this->CvarRegister(cvarName, "1.0");
+#endif
 
 					Q_snprintf(cvarName, sizeof(cvarName), "af_distance_%s", SlotInfo->weaponName);
 
-					this->m_af_distance[WeaponID] = this->CvarRegister(cvarName, "8192.0");
+					this->m_af_distance[WeaponID] = this->CvarRegister(cvarName, "3200.0");
 				}
 			}
 		}
@@ -44,6 +48,7 @@ void CAccuracyFix::ServerActivate()
 	g_engfuncs.pfnServerExecute();
 }
 
+#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
 void CAccuracyFix::CmdEnd(const edict_t* pEdict)
 {
 	auto Player = UTIL_PlayerByIndexSafe(ENTINDEX(pEdict));
@@ -56,6 +61,7 @@ void CAccuracyFix::CmdEnd(const edict_t* pEdict)
 		}
 	}
 }
+#endif
 
 bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
@@ -71,6 +77,7 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 				{
 					if (!((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)))
 					{
+#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
 						auto EntityIndex = Player->entindex();
 
 						if ((Player->edict()->v.button & IN_ATTACK) && (Player->m_flLastFired != this->m_Data[EntityIndex].LastFired))
@@ -79,8 +86,7 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 
 							this->m_Data[EntityIndex].WeaponId = Player->m_pActiveItem->m_iId;
 						}
-
-						int TargetIndex = 0, HitBoxPlace = 0;
+#endif
 
 						auto aimDistance = this->m_af_distance[Player->m_pActiveItem->m_iId]->value;
 
@@ -89,32 +95,49 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 							aimDistance = this->m_af_accuracy_all->value;
 						}
 
+						int TargetIndex = 0, HitBoxPlace = 0;
+
 						if (this->GetUserAiming(pentToSkip, &TargetIndex, &HitBoxPlace, aimDistance) > 0.0f)
 						{
-							if (TargetIndex && HitBoxPlace)
+							if (TargetIndex)
 							{
-								auto fwdDistance = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
-
-								if (fwdDistance > 0)
+								if (HitBoxPlace)
 								{
-									if (this->m_af_accuracy_all->value > 0)
+									if (!Player->IsBot())
 									{
-										fwdDistance = this->m_af_accuracy_all->value;
+										auto Target = UTIL_PlayerByIndexSafe(TargetIndex);
+
+										if (Target)
+										{
+											auto Distance = (Player->edict()->v.origin - Target->edict()->v.origin).Length();
+
+											LOG_CONSOLE(PLID, "[%s] Distance: %f", __func__, Distance);
+										}
 									}
 
-									g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
+									auto fwdDistance = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
 
-									Vector vEnd = Vector(0, 0, 0);
+									if (fwdDistance > 0.0f)
+									{
+										if (this->m_af_accuracy_all->value > 0.0f)
+										{
+											fwdDistance = this->m_af_accuracy_all->value;
+										}
 
-									vEnd = gpGlobals->v_forward * fwdDistance;
+										g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
 
-									vEnd[0] = start[0] + vEnd[0];
-									vEnd[1] = start[1] + vEnd[1];
-									vEnd[2] = start[2] + vEnd[2];
+										Vector vEnd = Vector(0.0f, 0.0f, 0.0f);
 
-									g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
+										vEnd = gpGlobals->v_forward * fwdDistance;
 
-									return true;
+										vEnd[0] = start[0] + vEnd[0];
+										vEnd[1] = start[1] + vEnd[1];
+										vEnd[2] = start[2] + vEnd[2];
+
+										g_engfuncs.pfnTraceLine(start, vEnd, fNoMonsters, pentToSkip, ptr);
+
+										return true;
+									}
 								}
 							}
 						}
@@ -127,6 +150,7 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 	return false;
 }
 
+#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
 void CAccuracyFix::PostThink(CBasePlayer* Player)
 {
 	if (Player->IsAlive())
@@ -155,6 +179,7 @@ void CAccuracyFix::PostThink(CBasePlayer* Player)
 		}
 	}
 }
+#endif
 
 float CAccuracyFix::GetUserAiming(edict_t* edict, int* cpId, int* cpBody, float distance)
 {

@@ -77,15 +77,18 @@ bool ReGameDLL_Init()
 		return false;
 	}
 
+#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
 	g_ReGameHookchains->CBasePlayer_PostThink()->registerHook(ReGameDLL_CBasePlayer_PostThink);
+#endif
 
 	return true;
 }
 
 bool ReGameDLL_Stop()
 {
+#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
 	g_ReGameHookchains->CBasePlayer_PostThink()->unregisterHook(ReGameDLL_CBasePlayer_PostThink);
-
+#endif
 	return true;
 }
 
@@ -104,10 +107,11 @@ CGameRules *ReGameDLL_InstallGameRules(IReGameHook_InstallGameRules *chain)
 	
 	return gamerules;
 }
-
+#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
 void ReGameDLL_CBasePlayer_PostThink(IReGameHook_CBasePlayer_PostThink* chain, CBasePlayer* pthis)
 {
 	chain->callNext(pthis);
 
 	gAccuracyFix.PostThink(pthis); 
 }
+#endif

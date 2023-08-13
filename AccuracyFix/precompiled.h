@@ -5,6 +5,9 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+// Disable Recoil Fix
+#define ACCURACY_DISABLE_RECOIL_CONTROL
+
 // If is not MSVC build
 #ifndef _WIN32
 #define _GLIBCXX_USE_CXX11_ABI		0
