@@ -65,7 +65,9 @@ void CAccuracyFix::CmdEnd(const edict_t* pEdict)
 
 bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
-	auto Player = UTIL_PlayerByIndexSafe(ENTINDEX(pentToSkip));
+	auto EntityIndex = ENTINDEX(pentToSkip);
+
+	auto Player = UTIL_PlayerByIndexSafe(EntityIndex);
 	
 	if (Player)
 	{
@@ -78,8 +80,6 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 					if (!((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)))
 					{
 #ifndef ACCURACY_DISABLE_RECOIL_CONTROL
-						auto EntityIndex = Player->entindex();
-
 						if ((Player->edict()->v.button & IN_ATTACK) && (Player->m_flLastFired != this->m_Data[EntityIndex].LastFired))
 						{
 							this->m_Data[EntityIndex].LastFired = Player->m_flLastFired;
@@ -87,7 +87,6 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 							this->m_Data[EntityIndex].WeaponId = Player->m_pActiveItem->m_iId;
 						}
 #endif
-
 						auto aimDistance = this->m_af_distance[Player->m_pActiveItem->m_iId]->value;
 
 						if (this->m_af_accuracy_all->value > 0)
@@ -99,9 +98,9 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 
 						if (this->GetUserAiming(pentToSkip, &TargetIndex, &HitBoxPlace, aimDistance) > 0.0f)
 						{
-							if (TargetIndex)
+							if (TargetIndex > 0)
 							{
-								if (HitBoxPlace)
+								if (HitBoxPlace > 0)
 								{
 									auto fwdDistance = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
 
@@ -111,7 +110,7 @@ bool CAccuracyFix::TraceLine(const float* start, const float* end, int fNoMonste
 										{
 											fwdDistance = this->m_af_accuracy_all->value;
 										}
-
+										
 										g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
 
 										Vector vEnd = Vector(0.0f, 0.0f, 0.0f);
@@ -171,41 +170,44 @@ void CAccuracyFix::PostThink(CBasePlayer* Player)
 
 float CAccuracyFix::GetUserAiming(edict_t* edict, int* cpId, int* cpBody, float distance)
 {
-	float pFloat = 0.0f;
+	float Result = 0.0f;
 
-	auto Entityindex = ENTINDEX(edict);
-
-	if (Entityindex > 0 && Entityindex <= gpGlobals->maxClients)
+	if (!FNullEnt(edict))
 	{
-		Vector v_forward;
+		auto Entityindex = ENTINDEX(edict);
 
-		Vector v_src = edict->v.origin + edict->v.view_ofs;
-
-		g_engfuncs.pfnAngleVectors(edict->v.v_angle, v_forward, NULL, NULL);
-
-		TraceResult trEnd;
-
-		Vector v_dest = v_src + v_forward * distance;
-
-		g_engfuncs.pfnTraceLine(v_src, v_dest, 0, edict, &trEnd);
-
-		*cpId = FNullEnt(trEnd.pHit) ? 0 : ENTINDEX(trEnd.pHit);
-
-		*cpBody = trEnd.iHitgroup;
-
-		if (trEnd.flFraction < 1.0f)
+		if (Entityindex > 0 && Entityindex <= gpGlobals->maxClients)
 		{
-			pFloat = (trEnd.vecEndPos - v_src).Length();
-		}
+			Vector v_forward;
 
-		return pFloat;
+			Vector v_src = edict->v.origin + edict->v.view_ofs;
+
+			g_engfuncs.pfnAngleVectors(edict->v.v_angle, v_forward, NULL, NULL);
+
+			TraceResult trEnd;
+
+			Vector v_dest = v_src + v_forward * distance;
+
+			g_engfuncs.pfnTraceLine(v_src, v_dest, 0, edict, &trEnd);
+
+			*cpId = FNullEnt(trEnd.pHit) ? 0 : ENTINDEX(trEnd.pHit);
+
+			*cpBody = trEnd.iHitgroup;
+
+			if (trEnd.flFraction < 1.0f)
+			{
+				Result = (trEnd.vecEndPos - v_src).Length();
+			}
+
+			return Result;
+		}
 	}
 
 	*cpId = 0;
 
 	*cpBody = 0;
 
-	return pFloat;
+	return Result;
 }
 
 cvar_t* CAccuracyFix::CvarRegister(const char* Name, const char* Value)
