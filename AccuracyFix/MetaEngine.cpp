@@ -34,13 +34,8 @@ C_DLLEXPORT int GetEngineFunctions_Post(enginefuncs_t* pengfuncsFromEngine, int*
 
 void ENGINE_POST_TraceLine(const float* start, const float* end, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
-	if (gAccuracyFix.TraceLine(start, end, fNoMonsters, pentToSkip, ptr))
-	{
-		RETURN_META(MRES_SUPERCEDE);
-	}
-	else
-	{
-		RETURN_META(MRES_IGNORED);
-	}
+	gAccuracyFix.TraceLine(start, end, fNoMonsters, pentToSkip, ptr);
+
+	RETURN_META(MRES_IGNORED);
 }
 #pragma endregion
