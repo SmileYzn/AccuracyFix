@@ -33,7 +33,7 @@ jobs:
     
     - name: Move release file to publish
       run: |
-        # Make Match BOT path
+        # Make Accuracy Fix path
         mkdir -p publish/addons/accuracyfix/dlls
 
         # Move released file to dlls
