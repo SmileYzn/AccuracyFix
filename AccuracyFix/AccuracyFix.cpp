@@ -103,14 +103,14 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 								if (TargetIndex > 0)
 								{
 									auto fwdVelocity = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
-
+									
+									if (this->m_af_accuracy_all->value > 0.0f)
+									{
+										fwdVelocity = this->m_af_accuracy_all->value;
+									}
+									
 									if (fwdVelocity > 0.0f)
 									{
-										if (this->m_af_accuracy_all->value > 0.0f)
-										{
-											fwdVelocity = this->m_af_accuracy_all->value;
-										}
-
 										g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
 
 										Vector Result = Vector(0.0f, 0.0f, 0.0f);
