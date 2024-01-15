@@ -15,14 +15,14 @@ COMPILER 	= g++
 OBJECTS 	= *.cpp
 
 # Linker Libs
-LINKER 		= 
+LINKER 		= -static-libgcc -static-libstdc++
 
 # Compiler version check to static linking
 RES_COMPILER_VERSION := $(shell expr "`$(COMPILER) -dumpversion`" ">=" "5")
 
 # Link static lib if compiler is newer than minimum version
 ifeq "$(RES_COMPILER_VERSION)" "1"
-LINKER += -static-libstdc++
+LINKER += -static-libgcc -static-libstdc++
 endif
 
 # C flags
