@@ -100,7 +100,7 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 							
 							if (this->GetUserAiming(pentToSkip, &TargetIndex, &HitBoxPlace, aimDistance) > 0.0f)
 							{
-								if (TargetIndex > 0)
+								if (TargetIndex > 0 && TargetIndex <= gpGlobals->maxClients)
 								{
 									auto fwdVelocity = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
 									
