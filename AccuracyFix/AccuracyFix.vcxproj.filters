@@ -25,6 +25,9 @@
     <Filter Include="ReGameDLL">
       <UniqueIdentifier>{3a2f7dd5-133f-41d5-b627-5e16bbe5f958}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AccuracyFix\AccuracyUtil">
+      <UniqueIdentifier>{119d37cb-5db2-4d96-ae2b-a55ee606254c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="precompiled.cpp">
@@ -48,6 +51,9 @@
     <ClCompile Include="ReGameDLL.cpp">
       <Filter>ReGameDLL</Filter>
     </ClCompile>
+    <ClCompile Include="AccuracyUtil.cpp">
+      <Filter>AccuracyFix\AccuracyUtil</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="precompiled.h">
@@ -70,6 +76,9 @@
     </ClInclude>
     <ClInclude Include="ReGameDLL.h">
       <Filter>ReGameDLL</Filter>
+    </ClInclude>
+    <ClInclude Include="AccuracyUtil.h">
+      <Filter>AccuracyFix\AccuracyUtil</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

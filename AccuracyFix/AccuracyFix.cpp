@@ -4,15 +4,15 @@ CAccuracyFix gAccuracyFix;
 
 void CAccuracyFix::ServerActivate()
 {
-#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
+	this->m_af_accuracy_all = gAccuracyUtil.CvarRegister("af_accuracy_all", "-1.0");
+
+	this->m_af_distance_all = gAccuracyUtil.CvarRegister("af_distance_all", "-1.0");
+
+#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
 	this->m_Data.clear();
 
-	this->m_af_recoil_all = this->CvarRegister("af_recoil_all", "-1.0");
+	this->m_af_recoil_all = gAccuracyUtil.CvarRegister("af_recoil_all", "-1.0");
 #endif
-
-	this->m_af_accuracy_all = this->CvarRegister("af_accuracy_all", "-1.0");
-
-	this->m_af_distance_all = this->CvarRegister("af_distance_all", "-1.0");
 
 	for (int WeaponID = WEAPON_P228; WeaponID <= WEAPON_P90; WeaponID++)
 	{
@@ -24,31 +24,37 @@ void CAccuracyFix::ServerActivate()
 			{
 				if (SlotInfo->weaponName)
 				{
-					char cvarName[32] = { 0 };
+					if (SlotInfo->weaponName[0u] != '\0')
+					{
+						std::string cvarName = "af_distance_";
 
-					Q_snprintf(cvarName, sizeof(cvarName), "af_accuracy_%s", SlotInfo->weaponName);
+						cvarName.append(SlotInfo->weaponName);
 
-					this->m_af_accuracy[WeaponID] = this->CvarRegister(cvarName, "9999.0");
+						this->m_af_distance[WeaponID] = gAccuracyUtil.CvarRegister(cvarName.c_str(), "8192.0");
 
-#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
-					Q_snprintf(cvarName, sizeof(cvarName), "af_recoil_%s", SlotInfo->weaponName);
+						cvarName = "af_accuracy_";
 
-					this->m_af_recoil[WeaponID] = this->CvarRegister(cvarName, "1.0");
+						cvarName.append(SlotInfo->weaponName);
+
+						this->m_af_accuracy[WeaponID] = gAccuracyUtil.CvarRegister(cvarName.c_str(), "9999.0");
+
+#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
+						cvarName = "af_recoil_";
+
+						cvarName.append(SlotInfo->weaponName);
+
+						this->m_af_recoil[WeaponID] = gAccuracyUtil.CvarRegister(cvarName.c_str(), "1.0");
 #endif
-
-					Q_snprintf(cvarName, sizeof(cvarName), "af_distance_%s", SlotInfo->weaponName);
-
-					this->m_af_distance[WeaponID] = this->CvarRegister(cvarName, "2048.0");
+					}
 				}
 			}
 		}
 	}
 
-	g_engfuncs.pfnServerCommand("exec addons/accuracyfix/accuracyfix.cfg\n");
-	g_engfuncs.pfnServerExecute();
+	gAccuracyUtil.ServerCommand("exec %s/accuracyfix.cfg", gAccuracyUtil.GetPath());
 }
 
-#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
+#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
 void CAccuracyFix::CmdEnd(const edict_t* pEdict)
 {
 	auto Player = UTIL_PlayerByIndexSafe(ENTINDEX(pEdict));
@@ -65,61 +71,67 @@ void CAccuracyFix::CmdEnd(const edict_t* pEdict)
 
 void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
-	auto EntityIndex = ENTINDEX(pentToSkip);
-
-	if (EntityIndex > 0 && EntityIndex <= gpGlobals->maxClients)
+	if (fNoMonsters == dont_ignore_monsters)
 	{
-		auto Player = UTIL_PlayerByIndexSafe(EntityIndex);
-
-		if (Player)
+		if (!FNullEnt(pentToSkip))
 		{
-			if (Player->IsAlive())
+			auto EntityIndex = g_engfuncs.pfnIndexOfEdict(pentToSkip);
+
+			if (EntityIndex > 0 && EntityIndex <= gpGlobals->maxClients)
 			{
-				if (fNoMonsters == dont_ignore_monsters)
+				auto Player = UTIL_PlayerByIndexSafe(EntityIndex);
+
+				if (Player)
 				{
-					if (Player->m_pActiveItem)
+					if (Player->IsAlive())
 					{
-						if (!((BIT(WEAPON_NONE) | BIT(WEAPON_HEGRENADE) | BIT(WEAPON_C4) | BIT(WEAPON_SMOKEGRENADE) | BIT(WEAPON_FLASHBANG) | BIT(WEAPON_KNIFE)) & BIT(Player->m_pActiveItem->m_iId)))
+						if (Player->m_pActiveItem)
 						{
-#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
-							if ((Player->edict()->v.button & IN_ATTACK) && (Player->m_flLastFired != this->m_Data[EntityIndex].LastFired))
+							if ((Player->m_pActiveItem->iItemSlot() == PRIMARY_WEAPON_SLOT) || (Player->m_pActiveItem->iItemSlot() == PISTOL_SLOT))
 							{
-								this->m_Data[EntityIndex].LastFired = Player->m_flLastFired;
-
-								this->m_Data[EntityIndex].WeaponId = Player->m_pActiveItem->m_iId;
-							}
-#endif
-							auto aimDistance = this->m_af_distance[Player->m_pActiveItem->m_iId]->value;
-
-							if (this->m_af_distance_all->value > 0)
-							{
-								aimDistance = this->m_af_distance_all->value;
-							}
-
-							int TargetIndex = 0, HitBoxPlace = 0;
-							
-							if (this->GetUserAiming(pentToSkip, &TargetIndex, &HitBoxPlace, aimDistance) > 0.0f)
-							{
-								if (TargetIndex > 0 && TargetIndex <= gpGlobals->maxClients)
+#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
+								if ((Player->edict()->v.button & IN_ATTACK) && (Player->m_flLastFired != this->m_Data[EntityIndex].LastFired))
 								{
-									auto fwdVelocity = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
-									
-									if (this->m_af_accuracy_all->value > 0.0f)
+									this->m_Data[EntityIndex].LastFired = Player->m_flLastFired;
+
+									this->m_Data[EntityIndex].WeaponId = Player->m_pActiveItem->m_iId;
+								}
+#endif
+								auto DistanceLimit = this->m_af_distance[Player->m_pActiveItem->m_iId]->value;
+
+								if (this->m_af_distance_all->value > 0)
+								{
+									DistanceLimit = this->m_af_distance_all->value;
+								}
+
+								if (DistanceLimit > 0.0f)
+								{
+									auto trResult = gAccuracyUtil.GetUserAiming(pentToSkip, DistanceLimit);
+
+									if (!FNullEnt(trResult.pHit))
 									{
-										fwdVelocity = this->m_af_accuracy_all->value;
-									}
-									
-									if (fwdVelocity > 0.0f)
-									{
-										g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
+										auto TargetIndex = ENTINDEX(trResult.pHit);
 
-										Vector Result = Vector(0.0f, 0.0f, 0.0f);
+										if (TargetIndex > 0 && TargetIndex <= gpGlobals->maxClients)
+										{
+											auto fwdVelocity = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
 
-										Result[0] = (vStart[0] + (gpGlobals->v_forward[0] * fwdVelocity));
-										Result[1] = (vStart[1] + (gpGlobals->v_forward[1] * fwdVelocity));
-										Result[2] = (vStart[2] + (gpGlobals->v_forward[2] * fwdVelocity));
+											if (this->m_af_accuracy_all->value > 0.0f)
+											{
+												fwdVelocity = this->m_af_accuracy_all->value;
+											}
 
-										g_engfuncs.pfnTraceLine(vStart, Result, fNoMonsters, pentToSkip, ptr);
+											g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
+
+											auto vEndRes = Vector
+											(
+												(vStart[0] + (gpGlobals->v_forward[0] * fwdVelocity)),
+												(vStart[1] + (gpGlobals->v_forward[1] * fwdVelocity)),
+												(vStart[2] + (gpGlobals->v_forward[2] * fwdVelocity))
+											);
+
+											g_engfuncs.pfnTraceLine(vStart, vEndRes, fNoMonsters, pentToSkip, ptr);
+										}
 									}
 								}
 							}
@@ -131,7 +143,7 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 	}
 }
 
-#ifndef ACCURACY_DISABLE_RECOIL_CONTROL
+#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
 void CAccuracyFix::PostThink(CBasePlayer* Player)
 {
 	if (Player->IsAlive())
@@ -161,70 +173,3 @@ void CAccuracyFix::PostThink(CBasePlayer* Player)
 	}
 }
 #endif
-
-float CAccuracyFix::GetUserAiming(edict_t* pEdict, int* cpId, int* cpBody, float distance)
-{
-	float Result = 0.0f;
-
-	if (!FNullEnt(pEdict))
-	{
-		auto Entityindex = ENTINDEX(pEdict);
-
-		if (Entityindex > 0 && Entityindex <= gpGlobals->maxClients)
-		{
-			Vector v_forward;
-
-			Vector v_src = pEdict->v.origin + pEdict->v.view_ofs;
-
-			g_engfuncs.pfnAngleVectors(pEdict->v.v_angle, v_forward, NULL, NULL);
-
-			TraceResult trEnd;
-
-			Vector v_dest = v_src + v_forward * distance;
-
-			g_engfuncs.pfnTraceLine(v_src, v_dest, 0, pEdict, &trEnd);
-
-			*cpId = FNullEnt(trEnd.pHit) ? 0 : ENTINDEX(trEnd.pHit);
-
-			*cpBody = trEnd.iHitgroup;
-
-			if (trEnd.flFraction < 1.0f)
-			{
-				Result = (trEnd.vecEndPos - v_src).Length();
-			}
-
-			return Result;
-		}
-	}
-
-	*cpId = 0;
-
-	*cpBody = 0;
-
-	return Result;
-}
-
-cvar_t* CAccuracyFix::CvarRegister(const char* Name, const char* Value)
-{
-	cvar_t* Pointer = g_engfuncs.pfnCVarGetPointer(Name);
-
-	if (!Pointer)
-	{
-		this->m_Cvar[Name].name = Name;
-
-		this->m_Cvar[Name].string = (char*)(Value);
-
-		this->m_Cvar[Name].flags = (FCVAR_SERVER | FCVAR_SPONLY | FCVAR_UNLOGGED);
-
-		g_engfuncs.pfnCVarRegister(&this->m_Cvar[Name]);
-
-		Pointer = g_engfuncs.pfnCVarGetPointer(this->m_Cvar[Name].name);
-
-		if (Pointer)
-		{
-			g_engfuncs.pfnCvar_DirectSet(Pointer, Value);
-		}
-	}
-
-	return Pointer;
-}
