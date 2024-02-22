@@ -9,6 +9,7 @@
 
 <h3>About Plugin</h3>
 <p>This works with TraceLine function from Half-Life Engine, and make the default CS aim better.</p>
+<p>For example, if you aim at head, that update the traceline position from attacker to head of victim player.</p>
 <p>It also can control weapons recoil, but that is not the real objective of plugin!</p>
 
 ------
