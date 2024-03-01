@@ -4,9 +4,9 @@ CAccuracyUtil gAccuracyUtil;
 
 cvar_t* CAccuracyUtil::CvarRegister(const char* Name, const char* Value)
 {
-	cvar_t* CvarPointer = g_engfuncs.pfnCVarGetPointer(Name);
+	cvar_t* pCvar = g_engfuncs.pfnCVarGetPointer(Name);
 
-	if (CvarPointer == nullptr)
+	if (pCvar == nullptr)
 	{
 		this->m_CvarData[Name].name = Name;
 
@@ -16,15 +16,15 @@ cvar_t* CAccuracyUtil::CvarRegister(const char* Name, const char* Value)
 
 		g_engfuncs.pfnCVarRegister(&this->m_CvarData[Name]);
 
-		CvarPointer = g_engfuncs.pfnCVarGetPointer(this->m_CvarData[Name].name);
+		pCvar = g_engfuncs.pfnCVarGetPointer(this->m_CvarData[Name].name);
 
-		if (CvarPointer != nullptr)
+		if (pCvar != nullptr)
 		{
-			g_engfuncs.pfnCvar_DirectSet(CvarPointer, Value);
+			g_engfuncs.pfnCvar_DirectSet(pCvar, Value);
 		}
 	}
 
-	return CvarPointer;
+	return pCvar;
 }
 
 const char* CAccuracyUtil::GetPath()

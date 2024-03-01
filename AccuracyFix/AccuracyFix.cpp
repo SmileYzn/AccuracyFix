@@ -26,24 +26,20 @@ void CAccuracyFix::ServerActivate()
 				{
 					if (SlotInfo->weaponName[0u] != '\0')
 					{
-						std::string cvarName = "af_distance_";
+						char cvarName[64] = { 0 };
 
-						cvarName.append(SlotInfo->weaponName);
+						Q_snprintf(cvarName, sizeof(cvarName), "af_distance_%s", SlotInfo->weaponName);
 
-						this->m_af_distance[WeaponID] = gAccuracyUtil.CvarRegister(cvarName.c_str(), "8192.0");
+						this->m_af_distance[WeaponID] = gAccuracyUtil.CvarRegister(cvarName, "8192.0");
 
-						cvarName = "af_accuracy_";
+						Q_snprintf(cvarName, sizeof(cvarName), "af_accuracy_%s", SlotInfo->weaponName);
 
-						cvarName.append(SlotInfo->weaponName);
-
-						this->m_af_accuracy[WeaponID] = gAccuracyUtil.CvarRegister(cvarName.c_str(), "9999.0");
+						this->m_af_accuracy[WeaponID] = gAccuracyUtil.CvarRegister(cvarName, "9999.0");
 
 #ifdef ACCURACY_ENABLE_RECOIL_CONTROL
-						cvarName = "af_recoil_";
+						Q_snprintf(cvarName, sizeof(cvarName), "af_recoil_%s", SlotInfo->weaponName);
 
-						cvarName.append(SlotInfo->weaponName);
-
-						this->m_af_recoil[WeaponID] = gAccuracyUtil.CvarRegister(cvarName.c_str(), "1.0");
+						this->m_af_recoil[WeaponID] = gAccuracyUtil.CvarRegister(cvarName, "1.0");
 #endif
 					}
 				}
@@ -51,7 +47,15 @@ void CAccuracyFix::ServerActivate()
 		}
 	}
 
-	gAccuracyUtil.ServerCommand("exec %s/accuracyfix.cfg", gAccuracyUtil.GetPath());
+	auto Path = gAccuracyUtil.GetPath();
+
+	if (Path)
+	{
+		if (Path[0u] != '\0')
+		{
+			gAccuracyUtil.ServerCommand("exec %s/accuracyfix.cfg", Path);
+		}
+	}
 }
 
 #ifdef ACCURACY_ENABLE_RECOIL_CONTROL
@@ -123,12 +127,7 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 
 											g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
 
-											auto vEndRes = Vector
-											(
-												(vStart[0] + (gpGlobals->v_forward[0] * fwdVelocity)),
-												(vStart[1] + (gpGlobals->v_forward[1] * fwdVelocity)),
-												(vStart[2] + (gpGlobals->v_forward[2] * fwdVelocity))
-											);
+											auto vEndRes = (Vector)vStart + gpGlobals->v_forward * fwdVelocity;
 
 											g_engfuncs.pfnTraceLine(vStart, vEndRes, fNoMonsters, pentToSkip, ptr);
 										}
