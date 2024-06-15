@@ -100,12 +100,12 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 		DistanceLimit = this->m_af_distance_all->value;
 	}
 
-	if (!(DistanceLimit > 0.0f)
+	if (!(DistanceLimit > 0.0f && Player->edict()->v.flags & FL_ONGROUND))
 		return;
 
 	auto trResult = gAccuracyUtil.GetUserAiming(pentToSkip, DistanceLimit);
 
-	if (FNullEnt(trResult.pHit)))
+	if (!(trResult.flFraction != 1.0f && !FNullEnt(trResult.pHit)))
 		return;
 
 	auto TargetIndex = ENTINDEX(trResult.pHit);
