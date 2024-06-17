@@ -25,33 +25,12 @@
 *   version.
 *
 */
+
 #pragma once
 
-#define SF_BUTTON_DONTMOVE		1
-#define SF_ROTBUTTON_NOTSOLID		1
-#define SF_BUTTON_TOGGLE		32	// button stays pushed until reactivated
-#define SF_BUTTON_SPARK_IF_OFF		64	// button sparks in OFF state
-#define SF_BUTTON_TOUCH_ONLY		256	// button only fires as a result of USE key.
+#define SF_GLOBAL_SET BIT(0) // Set global state to initial state on spawn
 
-#define SF_GLOBAL_SET			1	// Set global state to initial state on spawn
-
-#define SF_MULTI_INIT			1
-
-// Make this button behave like a door (HACKHACK)
-// This will disable use and make the button solid
-// rotating buttons were made SOLID_NOT by default since their were some
-// collision problems with them...
-#define SF_MOMENTARY_DOOR		0x0001
-
-#define SF_SPARK_TOOGLE			32
-#define SF_SPARK_IF_OFF			64
-
-#define SF_BTARGET_USE			0x0001
-#define SF_BTARGET_ON			0x0002
-
-class CEnvGlobal: public CPointEntity
-{
-	DECLARE_CLASS_TYPES(CEnvGlobal, CPointEntity);
+class CEnvGlobal: public CPointEntity {
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -64,16 +43,26 @@ public:
 	int m_initialstate;
 };
 
-class CRotButton: public CBaseButton
-{
-	DECLARE_CLASS_TYPES(CRotButton, CBaseButton);
+#define SF_ROTBUTTON_NOTSOLID  BIT(0)
+#define SF_ROTBUTTON_BACKWARDS BIT(1)
+
+class CRotButton: public CBaseButton {
 public:
 	virtual void Spawn() = 0;
+	virtual void Restart() = 0;
+	virtual int Save(CSave &save) = 0;
+	virtual int Restore(CRestore &restore) = 0;
+public:
+	Vector m_vecSpawn;
 };
 
-class CMomentaryRotButton: public CBaseToggle
-{
-	DECLARE_CLASS_TYPES(CMomentaryRotButton, CBaseToggle);
+// Make this button behave like a door (HACKHACK)
+// This will disable use and make the button solid
+// rotating buttons were made SOLID_NOT by default since their were some
+// collision problems with them...
+#define SF_MOMENTARY_DOOR BIT(0)
+
+class CMomentaryRotButton: public CBaseToggle {
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -90,9 +79,10 @@ public:
 	int m_sounds;
 };
 
-class CEnvSpark: public CBaseEntity
-{
-	DECLARE_CLASS_TYPES(CEnvSpark, CBaseEntity);
+#define SF_SPARK_TOOGLE BIT(5)
+#define SF_SPARK_IF_OFF BIT(6)
+
+class CEnvSpark: public CBaseEntity {
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -103,9 +93,10 @@ public:
 	float m_flDelay;
 };
 
-class CButtonTarget: public CBaseEntity
-{
-	DECLARE_CLASS_TYPES(CButtonTarget, CBaseEntity);
+#define SF_BTARGET_USE BIT(0)
+#define SF_BTARGET_ON  BIT(1)
+
+class CButtonTarget: public CBaseEntity {
 public:
 	virtual void Spawn() = 0;
 	virtual int ObjectCaps() = 0;

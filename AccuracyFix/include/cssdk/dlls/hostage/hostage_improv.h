@@ -25,6 +25,7 @@
 *   version.
 *
 */
+
 #pragma once
 
 #include "hostage/hostage.h"
@@ -36,6 +37,8 @@ enum HostageChatterType;
 // A Counter-Strike Hostage improved
 class CHostageImprov: public CImprov {
 public:
+	virtual ~CHostageImprov() {};
+
 	// invoked when an improv reaches its MoveTo goal
 	virtual void OnMoveToSuccess(const Vector &goal) = 0;
 
@@ -202,7 +205,7 @@ private:
 	Vector m_jumpTarget;
 	CountdownTimer m_clearPathTimer;
 	bool m_traversingLadder;
-	EHANDLE m_visiblePlayer[MAX_CLIENTS];
+	EntityHandle<CBasePlayer> m_visiblePlayer[MAX_CLIENTS];
 	int m_visiblePlayerCount;
 	CountdownTimer m_visionTimer;
 };

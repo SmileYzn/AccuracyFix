@@ -25,7 +25,11 @@
 *   version.
 *
 */
+
 #pragma once
+
+#define DEFINE_DECAL(name)\
+	{ name, 0 }
 
 enum decal_e
 {
@@ -64,13 +68,14 @@ enum decal_e
 	DECAL_BIGSHOT5,
 	DECAL_SPIT1,
 	DECAL_SPIT2,
-	DECAL_BPROOF1,		// Bulletproof glass decal
-	DECAL_GARGSTOMP1,	// Gargantua stomp crack
-	DECAL_SMALLSCORCH1,	// Small scorch mark
-	DECAL_SMALLSCORCH2,	// Small scorch mark
-	DECAL_SMALLSCORCH3,	// Small scorch mark
-	DECAL_MOMMABIRTH,	// Big momma birth splatter
+	DECAL_BPROOF1,      // Bulletproof glass decal
+	DECAL_GARGSTOMP1,   // Gargantua stomp crack
+	DECAL_SMALLSCORCH1, // Small scorch mark
+	DECAL_SMALLSCORCH2, // Small scorch mark
+	DECAL_SMALLSCORCH3, // Small scorch mark
+	DECAL_MOMMABIRTH,   // Big momma birth splatter
 	DECAL_MOMMASPLAT,
+	DECAL_END
 };
 
 typedef struct
@@ -80,4 +85,4 @@ typedef struct
 
 } DLL_DECALLIST;
 
-extern DLL_DECALLIST gDecals[42];
+extern DLL_DECALLIST gDecals[DECAL_END];

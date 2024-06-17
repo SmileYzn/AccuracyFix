@@ -30,6 +30,8 @@
 
 #include "util.h"
 #include "schedule.h"
+#include "saverestore.h"
+#include "scriptevent.h"
 #include "monsterevent.h"
 
 class CSave;
@@ -41,18 +43,23 @@ class CBasePlayerItem;
 class CSquadMonster;
 class CCSEntity;
 
-#define DECLARE_CLASS_TYPES(className, baseClassName)\
-public:                                              \
-	using BaseClass = baseClassName;                 \
-	using ThisClass = className;                     \
+#define SetThink(a)\
+	m_pfnThink = static_cast<void (CBaseEntity::*)()>(a)
+#define SetTouch(a)\
+	m_pfnTouch = static_cast<void (CBaseEntity::*)(CBaseEntity *)>(a)
+#define SetUse(a)\
+	m_pfnUse = static_cast<void (CBaseEntity::*)(CBaseEntity *, CBaseEntity *, USE_TYPE, float)>(a)
+#define SetBlocked(a)\
+	m_pfnBlocked = static_cast<void (CBaseEntity::*)(CBaseEntity *)>(a)
 
-class CBaseEntity
-{
-	DECLARE_CLASS_TYPES(CBaseEntity, CBaseEntity);
+#define SetMoveDone(a)\
+	m_pfnCallWhenMoveDone = static_cast<void (CBaseToggle::*)()>(a)
+
+class CBaseEntity {
 public:
-	// Constructor.  Set engine to use C/C++ callback functions
+	// Constructor. Set engine to use C/C++ callback functions
 	// pointers to engine data
-	entvars_t *pev;				// Don't need to save/restore this pointer, the engine resets it
+	entvars_t *pev;					// Don't need to save/restore this pointer, the engine resets it
 
 	// path corners
 	CBaseEntity *m_pGoalEnt;		// path corner we are heading towards
@@ -90,7 +97,7 @@ public:
 	virtual void AddPointsToTeam(int score, BOOL bAllowNegativeScore) = 0;
 	virtual BOOL AddPlayerItem(CBasePlayerItem *pItem) = 0;
 	virtual BOOL RemovePlayerItem(CBasePlayerItem *pItem) = 0;
-	virtual int GiveAmmo(int iAmount, char *szName, int iMax = -1) = 0;
+	virtual int GiveAmmo(int iAmount, const char *szName, int iMax = -1) = 0;
 	virtual float GetDelay() = 0;
 	virtual int IsMoving() = 0;
 	virtual void OverrideReset() = 0;
@@ -119,31 +126,6 @@ public:
 	void (CBaseEntity::*m_pfnUse)(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	void (CBaseEntity::*m_pfnBlocked)(CBaseEntity *pOther);
 
-	void EXT_FUNC DLLEXPORT SUB_Think();
-	void EXT_FUNC DLLEXPORT SUB_Touch(CBaseEntity *pOther);
-	void EXT_FUNC DLLEXPORT SUB_Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
-	void EXT_FUNC DLLEXPORT SUB_Blocked(CBaseEntity *pOther);
-
-	using thinkfn_t = decltype(m_pfnThink);
-	template <typename T>
-	void SetThink(void (T::*pfn)());
-	void SetThink(std::nullptr_t);
-
-	using touchfn_t = decltype(m_pfnTouch);
-	template <typename T>
-	void SetTouch(void (T::*pfn)(CBaseEntity *pOther));
-	void SetTouch(std::nullptr_t);
-
-	using usefn_t = decltype(m_pfnUse);
-	template <typename T>
-	void SetUse(void (T::*pfn)(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value));
-	void SetUse(std::nullptr_t);
-
-	using blockedfn_t = decltype(m_pfnBlocked);
-	template <typename T>
-	void SetBlocked(void (T::*pfn)(CBaseEntity *pOther));
-	void SetBlocked(std::nullptr_t);
-
 	virtual void Think() = 0;
 	virtual void Touch(CBaseEntity *pOther) = 0;
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType = USE_OFF, float value = 0.0f) = 0;
@@ -153,9 +135,9 @@ public:
 	virtual void UpdateOwner() = 0;
 	virtual BOOL FBecomeProne() = 0;
 
-	virtual Vector Center() = 0;					// center point of entity
-	virtual Vector EyePosition() = 0;				// position of eyes
-	virtual Vector EarPosition() = 0;				// position of ears
+	virtual Vector Center() = 0;								// center point of entity
+	virtual Vector EyePosition() = 0;							// position of eyes
+	virtual Vector EarPosition() = 0;							// position of ears
 	virtual Vector BodyTarget(const Vector &posSrc) = 0;		// position to shoot at
 
 	virtual int Illumination() = 0;
@@ -166,14 +148,35 @@ public:
 	static CBaseEntity *Instance(entvars_t *pev) { return Instance(ENT(pev)); }
 	static CBaseEntity *Instance(int offset) { return Instance(ENT(offset)); }
 
-	edict_t *edict() { return ENT(pev); }
-	EOFFSET eoffset() { return OFFSET(pev); }
-	int entindex() { return ENTINDEX(edict()); }
-	int IsDormant() { return (pev->flags & FL_DORMANT) == FL_DORMANT; }
+	edict_t *edict();
+	EOFFSET eoffset();
+	int entindex();
+	int IsDormant();
+
+	bool Intersects(CBaseEntity *pOther);
+	bool Intersects(const Vector &mins, const Vector &maxs);
+
+	// Exports func's, useful method's for SetThink
+	void EXPORT SUB_CallUseToggle();
+	{
+		Use(this, this, USE_TOGGLE, 0);
+	}
+
+	void EXPORT SUB_Remove()
+	{
+		if (pev->health > 0)
+		{
+			// this situation can screw up monsters who can't tell their entity pointers are invalid.
+			pev->health = 0;
+			ALERT(at_aiconsole, "SUB_Remove called on entity with health > 0\n");
+		}
+
+		REMOVE_ENTITY(ENT(pev));
+	}
 
 public:
-	CCSEntity *m_pEntity;						// NOTE: it was replaced on member "int *current_ammo" because it is useless.
-	CCSEntity *CSEntity() const;
+	// NOTE: it was replaced on member "int *current_ammo" because it is useless.
+	CCSEntity *m_pEntity;
 
 	// We use this variables to store each ammo count.
 	float currentammo;
@@ -210,90 +213,35 @@ public:
 // Inlines
 inline BOOL FNullEnt(CBaseEntity *ent) { return (ent == NULL || FNullEnt(ent->edict())); }
 
-template <typename T>
-inline void CBaseEntity::SetThink(void (T::*pfn)())
-{
-	m_pfnThink = static_cast<thinkfn_t>(pfn);
-}
-
-inline void CBaseEntity::SetThink(std::nullptr_t)
-{
-	m_pfnThink = nullptr;
-}
-
-template <typename T>
-inline void CBaseEntity::SetTouch(void (T::*pfn)(CBaseEntity *pOther))
-{
-	m_pfnTouch = static_cast<touchfn_t>(pfn);
-}
-
-inline void CBaseEntity::SetTouch(std::nullptr_t)
-{
-	m_pfnTouch = nullptr;
-}
-
-template <typename T>
-inline void CBaseEntity::SetUse(void (T::*pfn)(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value))
-{
-	m_pfnUse = static_cast<usefn_t>(pfn);
-}
-
-inline void CBaseEntity::SetUse(std::nullptr_t)
-{
-	m_pfnUse = nullptr;
-}
-
-template <typename T>
-inline void CBaseEntity::SetBlocked(void (T::*pfn)(CBaseEntity *pOther))
-{
-	m_pfnBlocked = static_cast<blockedfn_t>(pfn);
-}
-
-inline void CBaseEntity::SetBlocked(std::nullptr_t)
-{
-	m_pfnBlocked = nullptr;
-}
-
-inline CCSEntity *CBaseEntity::CSEntity() const
-{
-	return m_pEntity;
-}
-
-class CPointEntity: public CBaseEntity
-{
-	DECLARE_CLASS_TYPES(CPointEntity, CBaseEntity);
+class CPointEntity: public CBaseEntity {
 public:
 	virtual void Spawn() = 0;
 	virtual int ObjectCaps() = 0;
 };
 
 // generic Delay entity
-class CBaseDelay: public CBaseEntity
-{
-	DECLARE_CLASS_TYPES(CBaseDelay, CBaseEntity);
+class CBaseDelay: public CBaseEntity {
 public:
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
 	virtual int Save(CSave &save) = 0;
 	virtual int Restore(CRestore &restore) = 0;
 public:
 	float m_flDelay;
-	int m_iszKillTarget;
+	string_t m_iszKillTarget;
 };
 
-class CBaseAnimating: public CBaseDelay
-{
-	DECLARE_CLASS_TYPES(CBaseAnimating, CBaseDelay);
+class CBaseAnimating: public CBaseDelay {
 public:
 	virtual int Save(CSave &save) = 0;
 	virtual int Restore(CRestore &restore) = 0;
 	virtual void HandleAnimEvent(MonsterEvent_t *pEvent) = 0;
 public:
 	// animation needs
-	float m_flFrameRate;				// computed FPS for current sequence
-	float m_flGroundSpeed;				// computed linear movement rate for current sequence
-	float m_flLastEventCheck;			// last time the event list was checked
-	BOOL m_fSequenceFinished;			// flag set when StudioAdvanceFrame moves across a frame boundry
-	BOOL m_fSequenceLoops;				// true if the sequence loops
+	float m_flFrameRate;		// computed FPS for current sequence
+	float m_flGroundSpeed;		// computed linear movement rate for current sequence
+	float m_flLastEventCheck;	// last time the event list was checked
+	BOOL m_fSequenceFinished;	// flag set when StudioAdvanceFrame moves across a frame boundry
+	BOOL m_fSequenceLoops;		// true if the sequence loops
 };
 
 // EHANDLE. Safe way to point to CBaseEntities who may die between frames
@@ -315,25 +263,21 @@ private:
 };
 
 // generic Toggle entity.
-class CBaseToggle: public CBaseAnimating
-{
-	DECLARE_CLASS_TYPES(CBaseToggle, CBaseAnimating);
+class CBaseToggle: public CBaseAnimating {
 public:
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
 	virtual int Save(CSave &save) = 0;
 	virtual int Restore(CRestore &restore) = 0;
 	virtual int GetToggleState() = 0;
 	virtual float GetDelay() = 0;
-
-	void EXT_FUNC DLLEXPORT SUB_MoveDone();
 public:
 	TOGGLE_STATE m_toggle_state;
 	float m_flActivateFinished;	// like attack_finished, but for doors
 	float m_flMoveDistance;		// how far a door should slide or rotate
 	float m_flWait;
 	float m_flLip;
-	float m_flTWidth;		// for plats
-	float m_flTLength;		// for plats
+	float m_flTWidth;			// for plats
+	float m_flTLength;			// for plats
 
 	Vector m_vecPosition1;
 	Vector m_vecPosition2;
@@ -344,12 +288,6 @@ public:
 	float m_flHeight;
 	EHANDLE m_hActivator;
 	void (CBaseToggle::*m_pfnCallWhenMoveDone)();
-
-	using movedonefn_t = decltype(m_pfnCallWhenMoveDone);
-	template <typename T>
-	void SetMoveDone(void (T::*pfn)());
-	void SetMoveDone(std::nullptr_t);
-
 	Vector m_vecFinalDest;
 	Vector m_vecFinalAngle;
 
@@ -362,24 +300,17 @@ public:
 								// deactivated.
 };
 
-template <typename T>
-inline void CBaseToggle::SetMoveDone(void (T::*pfn)())
-{
-	m_pfnCallWhenMoveDone = static_cast<movedonefn_t>(pfn);
-}
-
-inline void CBaseToggle::SetMoveDone(std::nullptr_t)
-{
-	m_pfnCallWhenMoveDone = nullptr;
-}
-
+#include "world.h"
 #include "basemonster.h"
 #include "player.h"
 
+#define SF_BUTTON_DONTMOVE      BIT(0)
+#define SF_BUTTON_TOGGLE        BIT(5) // button stays pushed until reactivated
+#define SF_BUTTON_SPARK_IF_OFF  BIT(6) // button sparks in OFF state
+#define SF_BUTTON_TOUCH_ONLY    BIT(8) // button only fires as a result of USE key.
+
 // Generic Button
-class CBaseButton: public CBaseToggle
-{
-	DECLARE_CLASS_TYPES(CBaseButton, CBaseToggle);
+class CBaseButton: public CBaseToggle {
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -388,16 +319,16 @@ public:
 	virtual BOOL TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType) = 0;
 	virtual int Save(CSave &save) = 0;
 	virtual int Restore(CRestore &restore) = 0;
-	virtual int ObjectCaps() = 0;		// Buttons that don't take damage can be IMPULSE used
+	virtual int ObjectCaps() = 0;	// Buttons that don't take damage can be IMPULSE used
 public:
-	BOOL m_fStayPushed;			// button stays pushed in until touched again?
-	BOOL m_fRotating;			// a rotating button?  default is a sliding button.
+	BOOL m_fStayPushed;				// button stays pushed in until touched again?
+	BOOL m_fRotating;				// a rotating button?  default is a sliding button.
 
 	string_t m_strChangeTarget;		// if this field is not null, this is an index into the engine string array.
-							// when this button is touched, it's target entity's TARGET field will be set
-							// to the button's ChangeTarget. This allows you to make a func_train switch paths, etc.
+									// when this button is touched, it's target entity's TARGET field will be set
+									// to the button's ChangeTarget. This allows you to make a func_train switch paths, etc.
 
-	locksound_t m_ls;			// door lock sounds
+	locksound_t m_ls;				// door lock sounds
 
 	byte m_bLockedSound;			// ordinals from entity selection
 	byte m_bLockedSentence;
@@ -407,13 +338,10 @@ public:
 };
 
 // MultiSouce
+#define MAX_MS_TARGETS 32 // maximum number of targets a single multisource entity may be assigned.
+#define SF_MULTI_INIT BIT(0)
 
-#define MAX_MULTI_TARGETS	16	// maximum number of targets a single multi_manager entity may be assigned.
-#define MS_MAX_TARGETS		32
-
-class CMultiSource: public CPointEntity
-{
-	DECLARE_CLASS_TYPES(CMultiSource, CPointEntity);
+class CMultiSource: public CPointEntity {
 public:
 	virtual void Spawn() = 0;
 	virtual void Restart() = 0;
@@ -424,32 +352,94 @@ public:
 	virtual BOOL IsTriggered(CBaseEntity *pActivator) = 0;
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) = 0;
 public:
-	EHANDLE m_rgEntities[MS_MAX_TARGETS];
-	int m_rgTriggered[MS_MAX_TARGETS];
+	EHANDLE m_rgEntities[MAX_MS_TARGETS];
+	int m_rgTriggered[MAX_MS_TARGETS];
 
 	int m_iTotal;
 	string_t m_globalstate;
 };
 
-#define SF_WORLD_DARK       0x0001 // Fade from black at startup
-#define SF_WORLD_TITLE      0x0002 // Display game title at startup
-#define SF_WORLD_FORCETEAM  0x0004 // Force teams
+#define SF_WORLD_DARK       BIT(0) // Fade from black at startup
+#define SF_WORLD_TITLE      BIT(1) // Display game title at startup
+#define SF_WORLD_FORCETEAM  BIT(2) // Force teams
 
 // This spawns first when each level begins.
-class CWorld: public CBaseEntity
-{
-	DECLARE_CLASS_TYPES(CWorld, CBaseEntity);
+class CWorld: public CBaseEntity {
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
 };
 
+// Converts a entvars_t * to a class pointer
+// It will allocate the class and entity if necessary
+template <class T>
+T *GetClassPtr(T *a)
+{
+	entvars_t *pev = (entvars_t *)a;
+
+	// allocate entity if necessary
+	if (pev == nullptr)
+		pev = VARS(CREATE_ENTITY());
+
+	// get the private data
+	a = (T *)GET_PRIVATE(ENT(pev));
+
+	if (a == nullptr)
+	{
+		// allocate private data
+		a = new(pev) T;
+		a->pev = pev;
+	}
+
+	return a;
+}
+
 // Inlines
+inline edict_t *CBaseEntity::edict()
+{
+	return ENT(pev);
+}
+
+inline EOFFSET CBaseEntity::eoffset()
+{
+	return OFFSET(pev);
+}
+
+inline int CBaseEntity::entindex()
+{
+	return ENTINDEX(edict());
+}
+
+inline int CBaseEntity::IsDormant()
+{
+	return (pev->flags & FL_DORMANT) == FL_DORMANT;
+}
+
+inline bool CBaseEntity::Intersects(CBaseEntity *pOther)
+{
+	return Intersects(pOther->pev->absmin, pOther->pev->absmax);
+}
+
+inline bool CBaseEntity::Intersects(const Vector &mins, const Vector &maxs)
+{
+	if (mins.x > pev->absmax.x
+		|| mins.y > pev->absmax.y
+		|| mins.z > pev->absmax.z
+		|| maxs.x < pev->absmin.x
+		|| maxs.y < pev->absmin.y
+		|| maxs.z < pev->absmin.z)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 inline edict_t *EHANDLE::Get()
 {
 	if (!m_pent || m_pent->serialnumber != m_serialnumber)
-		return NULL;
+		return nullptr;
 
 	return m_pent;
 }
@@ -465,7 +455,7 @@ inline edict_t *EHANDLE::Set(edict_t *pent)
 
 inline EHANDLE::operator int()
 {
-	return Get() != NULL;
+	return Get() != nullptr;
 }
 
 inline EHANDLE::operator CBaseEntity *()
@@ -480,7 +470,7 @@ inline EHANDLE::operator CBasePlayer *()
 
 inline CBaseEntity *EHANDLE::operator=(CBaseEntity *pEntity)
 {
-	if (pEntity != NULL)
+	if (pEntity)
 	{
 		m_pent = ENT(pEntity->pev);
 		if (m_pent)
@@ -488,7 +478,7 @@ inline CBaseEntity *EHANDLE::operator=(CBaseEntity *pEntity)
 	}
 	else
 	{
-		m_pent = NULL;
+		m_pent = nullptr;
 		m_serialnumber = 0;
 	}
 

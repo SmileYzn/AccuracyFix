@@ -25,11 +25,10 @@
 *   version.
 *
 */
+
 #pragma once
 
-class CHalfLifeTraining: public CHalfLifeMultiplay
-{
-	DECLARE_CLASS_TYPES(CHalfLifeTraining, CHalfLifeMultiplay);
+class CHalfLifeTraining: public CHalfLifeMultiplay {
 protected:
 	virtual ~CHalfLifeTraining() {};
 public:
@@ -52,9 +51,14 @@ public:
 	bool fVGUIMenus;
 };
 
-class CBaseGrenCatch: public CBaseEntity
+enum GrenCatchType : int
 {
-	DECLARE_CLASS_TYPES(CBaseGrenCatch, CBaseEntity);
+	GRENADETYPE_NONE  = 0,
+	GRENADETYPE_SMOKE,
+	GRENADETYPE_FLASH,
+};
+
+class CBaseGrenCatch: public CBaseEntity {
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -64,16 +68,16 @@ public:
 	virtual void Think() = 0;
 	virtual void Touch(CBaseEntity *pOther) = 0;
 public:
-	int m_NeedGrenadeType;
+	GrenCatchType m_NeedGrenadeType;
 	string_t sTriggerOnGrenade;
 	string_t sDisableOnGrenade;
 	bool m_fSmokeTouching;
 	bool m_fFlashTouched;
 };
 
-class CFuncWeaponCheck: public CBaseEntity
-{
-	DECLARE_CLASS_TYPES(CFuncWeaponCheck, CBaseEntity);
+const int MAX_ITEM_COUNTS = 32;
+
+class CFuncWeaponCheck: public CBaseEntity {
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -84,7 +88,7 @@ private:
 	string_t sTriggerWithItems;
 	string_t sTriggerNoItems;
 	string_t sMaster;
-	unsigned int sItemName[32];
+	string_t sItemName[MAX_ITEM_COUNTS];
 	int iItemCount;
 	int iAnyWeapon;
 };

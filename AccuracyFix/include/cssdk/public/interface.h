@@ -114,8 +114,6 @@ extern CreateInterfaceFn Sys_GetFactory(const char *pModuleName);
 // load/unload components
 class CSysModule;
 
-extern CSysModule *Sys_GetModuleHandle(const char *pModuleName);
-
 // Load & Unload should be called in exactly one place for each module
 // The factory for that module should be passed on to dependent components for
 // proper versioning.

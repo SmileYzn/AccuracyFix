@@ -28,12 +28,9 @@
 
 #pragma once
 
-class CGib: public CBaseEntity
-{
-	DECLARE_CLASS_TYPES(CGib, CBaseEntity);
+class CGib: public CBaseEntity {
 public:
 	virtual int ObjectCaps() = 0;
-
 public:
 	int m_bloodColor;
 	int m_cBloodDecals;

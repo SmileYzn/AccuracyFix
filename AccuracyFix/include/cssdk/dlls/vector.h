@@ -25,20 +25,35 @@
 *   version.
 *
 */
+
 #pragma once
 
 // 2DVector - used for many pathfinding and many other 
 // operations that are treated as planar rather than 3d.
 class Vector2D {
 public:
+	// Construction/destruction
 	inline Vector2D() : x(), y() {}
 	inline Vector2D(float X, float Y) : x(X), y(Y) {}
-	inline Vector2D(const Vector2D &v) { *(int*)&x = *(int*)&v.x; *(int*)&y = *(int*)&v.y; }
-	inline Vector2D operator+(const Vector2D &v) const { return Vector2D(x + v.x, y + v.y); }
-	inline Vector2D operator-(const Vector2D &v) const { return Vector2D(x - v.x, y - v.y); }
-	inline Vector2D operator*(float fl) const { return Vector2D(x * fl, y * fl); }
-	inline Vector2D operator/(float fl) const { return Vector2D(x / fl, y / fl); }
+	inline Vector2D(const Vector2D &v) { *(int *)&x = *(int *)&v.x; *(int *)&y = *(int *)&v.y; }
+
+	// Operators
+	inline bool operator==(const Vector2D &v) const { return x == v.x && y == v.y; }
+	inline bool operator!=(const Vector2D &v) const { return !(*this == v); }
+
+	inline Vector2D operator*(float fl)  const { return Vector2D(x * fl, y * fl); }
+	inline Vector2D operator/(float fl)  const { return Vector2D(x / fl, y / fl); }
 	inline Vector2D operator/=(float fl) const { return Vector2D(x / fl, y / fl); }
+
+	inline Vector2D operator+(const Vector2D &v)  const { return Vector2D(x + v.x, y + v.y); }
+	inline Vector2D operator-(const Vector2D &v)  const { return Vector2D(x - v.x, y - v.y); }
+	inline Vector2D operator*(const Vector2D &v)  const { return Vector2D(x * v.x, y * v.y); }
+	inline Vector2D operator/(const Vector2D &v)  const { return Vector2D(x / v.x, y / v.y); }
+
+	inline Vector2D operator+=(const Vector2D &v) const { return Vector2D(x + v.x, y + v.y); }
+	inline Vector2D operator-=(const Vector2D &v) const { return Vector2D(x - v.x, y - v.y); }
+	inline Vector2D operator*=(const Vector2D &v) const { return Vector2D(x * v.x, y * v.y); }
+	inline Vector2D operator/=(const Vector2D &v) const { return Vector2D(x / v.x, y / v.y); }
 
 	inline float Length() const { return sqrt(x * x + y * y); }
 	inline float LengthSquared() const { return (x * x + y * y); }
@@ -56,7 +71,7 @@ public:
 		return Vector2D(x * flLen, y * flLen);
 	}
 
-	inline bool IsLengthLessThan(float length) const { return (LengthSquared() < length * length); }
+	inline bool IsLengthLessThan   (float length) const { return (LengthSquared() < length * length); }
 	inline bool IsLengthGreaterThan(float length) const { return (LengthSquared() > length * length); }
 	inline float NormalizeInPlace()
 	{
@@ -93,26 +108,35 @@ public:
 	// Construction/destruction
 	inline Vector() : x(), y(), z() {}
 	inline Vector(float X, float Y, float Z) : x(X), y(Y), z(Z) {}
-	inline Vector(const Vector &v) { *(int*)&x = *(int*)&v.x; *(int*)&y = *(int*)&v.y; *(int*)&z = *(int*)&v.z; }
-	inline Vector(const float rgfl[3]) { *(int*)&x = *(int*)&rgfl[0]; *(int*)&y = *(int*)&rgfl[1]; *(int*)&z = *(int*)&rgfl[2]; }
+	inline Vector(const Vector &v) { *(int *)&x = *(int *)&v.x; *(int *)&y = *(int *)&v.y; *(int *)&z = *(int *)&v.z; }
+	inline Vector(const float rgfl[3]) { *(int *)&x = *(int *)&rgfl[0]; *(int *)&y = *(int *)&rgfl[1]; *(int *)&z = *(int *)&rgfl[2]; }
 
 	// Operators
 	inline Vector operator-() const { return Vector(-x, -y, -z); }
-	inline int operator==(const Vector &v) const { return x == v.x && y == v.y && z == v.z; }
-	inline int operator!=(const Vector &v) const { return !(*this == v); }
-	inline Vector operator+(const Vector &v) const { return Vector(x + v.x, y + v.y, z + v.z); }
-	inline Vector operator-(const Vector &v) const { return Vector(x - v.x, y - v.y, z - v.z); }
-	inline Vector operator*(float fl) const { return Vector(x * fl, y * fl, z * fl); }
-	inline Vector operator/(float fl) const { return Vector(x / fl, y / fl, z / fl); }
-	inline Vector operator/=(float fl) const{ return Vector(x / fl, y / fl, z / fl); }
+	inline Vector operator*(float fl)  const { return Vector(x * fl, y * fl, z * fl); }
+	inline Vector operator/(float fl)  const { return Vector(x / fl, y / fl, z / fl); }
+	inline Vector operator/=(float fl) const { return Vector(x / fl, y / fl, z / fl); }
+
+	inline bool operator==(const Vector &v)   const { return x == v.x && y == v.y && z == v.z; }
+	inline bool operator!=(const Vector &v)   const { return !(*this == v); }
+
+	inline Vector operator+(const Vector &v)  const { return Vector(x + v.x, y + v.y, z + v.z); }
+	inline Vector operator-(const Vector &v)  const { return Vector(x - v.x, y - v.y, z - v.z); }
+	inline Vector operator*(const Vector &v)  const { return Vector(x * v.x, y * v.y, z * v.z); }
+	inline Vector operator/(const Vector &v)  const { return Vector(x / v.x, y / v.y, z / v.z); }
+
+	inline Vector operator+=(const Vector &v) const { return Vector(x + v.x, y + v.y, z + v.z); }
+	inline Vector operator-=(const Vector &v) const { return Vector(x - v.x, y - v.y, z - v.z); }
+	inline Vector operator*=(const Vector &v) const { return Vector(x * v.x, y * v.y, z * v.z); }
+	inline Vector operator/=(const Vector &v) const { return Vector(x / v.x, y / v.y, z / v.z); }
 
 	// Methods
-	inline void CopyToArray(float *rgfl) const { *(int*)&rgfl[0] = *(int*)&x; *(int*)&rgfl[1] = *(int*)&y; *(int*)&rgfl[2] = *(int*)&z; }
+	inline void CopyToArray(float *rgfl) const { *(int *)&rgfl[0] = *(int *)&x; *(int *)&rgfl[1] = *(int *)&y; *(int *)&rgfl[2] = *(int *)&z; }
 	inline float Length() const { return sqrt(x * x + y * y + z * z); }
 	inline float LengthSquared() const { return (x * x + y * y + z * z); }
 
-	operator float*() { return &x; }				// Vectors will now automatically convert to float * when needed
-	operator const float*() const { return &x; }			// Vectors will now automatically convert to float * when needed
+	operator float*()             { return &x; } // Vectors will now automatically convert to float * when needed
+	operator const float*() const { return &x; } // Vectors will now automatically convert to float * when needed
 
 	inline Vector Normalize()
 	{
@@ -126,14 +150,14 @@ public:
 	inline Vector2D Make2D() const
 	{
 		Vector2D Vec2;
-		*(int*)&Vec2.x = *(int*)&x;
-		*(int*)&Vec2.y = *(int*)&y;
+		*(int *)&Vec2.x = *(int *)&x;
+		*(int *)&Vec2.y = *(int *)&y;
 		return Vec2;
 	}
 
 	inline float Length2D() const { return sqrt(x * x + y * y); }
 
-	inline bool IsLengthLessThan(float length) const { return (LengthSquared() < length * length); }
+	inline bool IsLengthLessThan   (float length) const { return (LengthSquared() < length * length); }
 	inline bool IsLengthGreaterThan(float length) const { return (LengthSquared() > length * length); }
 
 	inline float NormalizeInPlace()
@@ -166,11 +190,3 @@ inline Vector operator*(float fl, const Vector &v) { return v * fl; }
 inline float DotProduct(const Vector &a, const Vector &b) { return (a.x * b.x + a.y * b.y + a.z * b.z); }
 inline float DotProduct2D(const Vector &a, const Vector &b) { return (a.x * b.x + a.y * b.y); }
 inline Vector CrossProduct(const Vector &a, const Vector &b) { return Vector(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x); }
-
-template<class T>
-inline void SWAP(T &first, T &second)
-{
-	T temp = first;
-	first = second;
-	second = temp;
-}

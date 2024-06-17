@@ -25,11 +25,24 @@
 *   version.
 *
 */
+
 #pragma once
 
+#include "gib.h"
 #include "activity.h"
 
-class EHANDLE;
+enum
+{
+	ITBD_PARALLYZE = 0,
+	ITBD_NERVE_GAS,
+	ITBD_POISON,
+	ITBD_RADIATION,
+	ITBD_DROWN_RECOVER,
+	ITBD_ACID,
+	ITBD_SLOW_BURN,
+	ITBD_SLOW_FREEZE,
+	ITBD_END
+};
 
 enum MONSTERSTATE
 {
@@ -45,9 +58,7 @@ enum MONSTERSTATE
 };
 
 class CBaseToggle;
-class CBaseMonster: public CBaseToggle
-{
-	DECLARE_CLASS_TYPES(CBaseMonster, CBaseToggle);
+class CBaseMonster: public CBaseToggle {
 public:
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
 	virtual void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) = 0;
@@ -88,20 +99,20 @@ public:
 public:
 	Activity m_Activity;			// what the monster is doing (animation)
 	Activity m_IdealActivity;		// monster should switch to this activity
-	int m_LastHitGroup;			// the last body region that took damage
+	int m_LastHitGroup;				// the last body region that took damage
 	int m_bitsDamageType;			// what types of damage has monster (player) taken
-	byte m_rgbTimeBasedDamage[8];
+	byte m_rgbTimeBasedDamage[ITBD_END];
 
 	MONSTERSTATE m_MonsterState;		// monster's current state
 	MONSTERSTATE m_IdealMonsterState;	// monster should change to this state
 	int m_afConditions;
 	int m_afMemory;
 
-	float m_flNextAttack;			// cannot attack again until this time
-	EHANDLE m_hEnemy;			// the entity that the monster is fighting.
-	EHANDLE m_hTargetEnt;			// the entity that the monster is trying to reach
-	float m_flFieldOfView;			// width of monster's field of view ( dot product )
-	int m_bloodColor;			// color of blood particless
-	Vector m_HackedGunPos;			// HACK until we can query end of gun
-	Vector m_vecEnemyLKP;			// last known position of enemy. (enemy's origin)
+	float m_flNextAttack;	// cannot attack again until this time
+	EHANDLE m_hEnemy;		// the entity that the monster is fighting.
+	EHANDLE m_hTargetEnt;	// the entity that the monster is trying to reach
+	float m_flFieldOfView;	// width of monster's field of view (dot product)
+	int m_bloodColor;		// color of blood particless
+	Vector m_HackedGunPos;	// HACK until we can query end of gun
+	Vector m_vecEnemyLKP;	// last known position of enemy. (enemy's origin)
 };

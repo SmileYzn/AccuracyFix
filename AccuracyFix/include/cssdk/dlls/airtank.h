@@ -25,11 +25,10 @@
 *   version.
 *
 */
+
 #pragma once
 
-class CAirtank: public CGrenade
-{
-	DECLARE_CLASS_TYPES(CAirtank, CGrenade);
+class CAirtank: public CGrenade {
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;

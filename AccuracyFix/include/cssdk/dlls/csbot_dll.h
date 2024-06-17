@@ -25,7 +25,6 @@
 *    version.
 *
 */
-
 #pragma once
 
 #include "../game_shared/GameEvent.h"

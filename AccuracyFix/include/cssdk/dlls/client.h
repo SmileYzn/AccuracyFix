@@ -53,8 +53,8 @@ enum BuyItemMenuSlot
 	MENU_SLOT_ITEM_SHIELD,
 };
 
-#define CS_NUM_SKIN			4
-#define CZ_NUM_SKIN			5
+#define CS_NUM_SKIN				4
+#define CZ_NUM_SKIN				5
 
 #define FIELD_ORIGIN0			0
 #define FIELD_ORIGIN1			1
@@ -73,8 +73,8 @@ enum BuyItemMenuSlot
 #define CUSTOMFIELD_ANGLES2		5
 
 #define CUSTOMFIELD_SKIN		6
-#define CUSTOMFIELD_SEQUENCE		7
-#define CUSTOMFIELD_ANIMTIME		8
+#define CUSTOMFIELD_SEQUENCE	7
+#define CUSTOMFIELD_ANIMTIME	8
 
 typedef struct
 {
@@ -82,12 +82,13 @@ typedef struct
 
 } ENTITYPVSSTATUS;
 
+const int MAX_ENTITIES = 1380;
 struct PLAYERPVSSTATUS
 {
-	ENTITYPVSSTATUS m_Status[1380];
+	ENTITYPVSSTATUS m_Status[MAX_ENTITIES];
 	int headnode;
 	int num_leafs;
-	short int leafnums[ MAX_ENT_LEAFS ];
+	short int leafnums[MAX_ENT_LEAFS];
 };
 
 struct entity_field_alias_t

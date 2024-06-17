@@ -25,11 +25,12 @@
 *   version.
 *
 */
+
 #pragma once
 
-#define SKILL_EASY	1
-#define SKILL_MEDIUM	2
-#define SKILL_HARD	3
+#define SKILL_EASY   1
+#define SKILL_MEDIUM 2
+#define SKILL_HARD   3
 
 struct skilldata_t
 {

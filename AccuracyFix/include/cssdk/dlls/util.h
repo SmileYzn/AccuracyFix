@@ -25,34 +25,36 @@
 *   version.
 *
 */
+
 #pragma once
 
+#include "shake.h"
+#include "ehandle.h"
+#include "activity.h"
 #include "enginecallback.h"
 
-#define eoNullEntity		0			// Testing the three types of "entity" for nullity
-#define iStringNull			(string_t)0	// Testing strings for nullity
+extern globalvars_t *gpGlobals;
 
-#define cchMapNameMost		32
+#define STRING(offset)			((const char *)(gpGlobals->pStringBase + (unsigned int)(offset)))
+#define MAKE_STRING(str)		((uint64)(str) - (uint64)(STRING(0)))
 
-#define CBSENTENCENAME_MAX	16
-#define CVOXFILESENTENCEMAX	1536	// max number of sentences in game. NOTE: this must match CVOXFILESENTENCEMAX in engine\sound.h
-
-#define GROUP_OP_AND		0
-#define GROUP_OP_NAND		1
+#define GROUP_OP_AND	0
+#define GROUP_OP_NAND	1
 
 // Dot products for view cone checking
-#define VIEW_FIELD_FULL		-1.0		// +-180 degrees
-#define VIEW_FIELD_WIDE		-0.7		// +-135 degrees 0.1 // +-85 degrees, used for full FOV checks
-#define VIEW_FIELD_NARROW	0.7		// +-45 degrees, more narrow check used to set up ranged attacks
+#define VIEW_FIELD_FULL			-1.0	// +-180 degrees
+#define VIEW_FIELD_WIDE			-0.7	// +-135 degrees 0.1 // +-85 degrees, used for full FOV checks
+#define VIEW_FIELD_NARROW		0.7		// +-45 degrees, more narrow check used to set up ranged attacks
 #define VIEW_FIELD_ULTRA_NARROW	0.9		// +-25 degrees, more narrow check used to set up ranged attacks
 
-#define SND_SPAWNING		(1<<8)		// duplicated in protocol.h we're spawing, used in some cases for ambients
-#define SND_STOP		(1<<5)		// duplicated in protocol.h stop sound
-#define SND_CHANGE_VOL		(1<<6)		// duplicated in protocol.h change sound vol
-#define SND_CHANGE_PITCH	(1<<7)		// duplicated in protocol.h change sound pitch
+#define SND_STOP				BIT(5)	// duplicated in protocol.h stop sound
+#define SND_CHANGE_VOL			BIT(6)	// duplicated in protocol.h change sound vol
+#define SND_CHANGE_PITCH		BIT(7)	// duplicated in protocol.h change sound pitch
+#define SND_SPAWNING			BIT(8)	// duplicated in protocol.h we're spawing, used in some cases for ambients
 
 // All monsters need this data
-#define DONT_BLEED		-1
+#define DONT_BLEED			-1
+#define BLOOD_COLOR_DARKRED	(byte)223
 #define BLOOD_COLOR_RED		(byte)247
 #define BLOOD_COLOR_YELLOW	(byte)195
 #define BLOOD_COLOR_GREEN	BLOOD_COLOR_YELLOW
@@ -68,7 +70,7 @@
 
 #define SVC_TEMPENTITY		23
 #define SVC_INTERMISSION	30
-#define SVC_CDTRACK		32
+#define SVC_CDTRACK			32
 #define SVC_WEAPONANIM		35
 #define SVC_ROOMTYPE		37
 #define SVC_DIRECTOR		51
@@ -79,7 +81,7 @@
 #define VEC_HULL_MIN		Vector(-16, -16, -36)
 #define VEC_HULL_MAX		Vector(16, 16, 36)
 
-#define VEC_VIEW		Vector(0, 0, 17)
+#define VEC_VIEW			Vector(0, 0, 17)
 
 #define VEC_DUCK_HULL_MIN	Vector(-16, -16, -18)
 #define VEC_DUCK_HULL_MAX	Vector(16, 16, 32)
@@ -87,6 +89,22 @@
 
 #define PRECACHE_SOUND_ARRAY(a) \
 	{ for (int i = 0; i < ARRAYSIZE(a); ++i) PRECACHE_SOUND((char *)a[i]); }
+
+#define PLAYBACK_EVENT(flags, who, index)\
+		PLAYBACK_EVENT_FULL(flags, who, index, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0.0, 0.0, 0, 0, 0, 0)
+
+#define PLAYBACK_EVENT_DELAY(flags, who, index, delay)\
+		PLAYBACK_EVENT_FULL(flags, who, index, delay, (float *)&g_vecZero, (float *)&g_vecZero, 0.0, 0.0, 0, 0, 0, 0)
+
+#define LINK_ENTITY_TO_CLASS(mapClassName, DLLClassName)\
+	C_DLLEXPORT void EXT_FUNC mapClassName(entvars_t *pev);\
+	void mapClassName(entvars_t *pev)\
+	{\
+		GetClassPtr((DLLClassName *)pev);\
+	}
+
+const EOFFSET eoNullEntity = (EOFFSET)0;	// Testing the three types of "entity" for nullity
+const string_t iStringNull = (string_t)0;	// Testing strings for nullity
 
 // Inlines
 inline edict_t *FIND_ENTITY_BY_CLASSNAME(edict_t *entStart, const char *pszName) { return FIND_ENTITY_BY_STRING(entStart, "classname", pszName); }
@@ -122,8 +140,8 @@ inline edict_t *INDEXENT(int iEdictNum) { return (*g_engfuncs.pfnPEntityOfEntInd
 inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent) { MESSAGE_BEGIN(msg_dest, msg_type, pOrigin, ENT(ent)); }
 inline BOOL FNullEnt(EOFFSET eoffset) { return (eoffset == 0); }
 inline BOOL FNullEnt(entvars_t *pev) { return (pev == NULL || FNullEnt(OFFSET(pev))); }
-inline BOOL FNullEnt(const edict_t *pent) { return (pent == NULL || FNullEnt(OFFSET(pent))); }
-inline BOOL FStringNull(int iString) { return ((string_t)iString == iStringNull); }
+inline BOOL FNullEnt(const edict_t *pent) { return (pent == NULL || pent->free || FNullEnt(OFFSET(pent))); }
+inline BOOL FNullEnt(EHANDLE hent) { return (hent == NULL || FNullEnt(OFFSET(hent.Get()))); }
 inline BOOL FStringNull(string_t iString) { return (iString == iStringNull); }
 inline BOOL FStrEq(const char *sz1, const char *sz2) { return (strcmp(sz1, sz2) == 0); }
 inline BOOL FClassnameIs(entvars_t *pev, const char *szClassname) { return FStrEq(STRING(pev->classname), szClassname); }

@@ -28,9 +28,10 @@
 
 #pragma once
 
+const float MAX_BOMB_RADIUS = 2048.0f;
+
 class CMapInfo: public CPointEntity
 {
-	DECLARE_CLASS_TYPES(CMapInfo, CPointEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;

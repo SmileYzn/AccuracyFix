@@ -25,20 +25,17 @@
 *   version.
 *
 */
+
 #pragma once
 
-class CHealthKit: public CItem
-{
-	DECLARE_CLASS_TYPES(CHealthKit, CItem);
+class CHealthKit: public CItem {
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
 	virtual BOOL MyTouch(CBasePlayer *pPlayer) = 0;
 };
 
-class CWallHealth: public CBaseToggle
-{
-	DECLARE_CLASS_TYPES(CWallHealth, CBaseToggle);
+class CWallHealth: public CBaseToggle {
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;

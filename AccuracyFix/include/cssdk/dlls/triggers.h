@@ -25,56 +25,12 @@
 *   version.
 *
 */
+
 #pragma once
 
-#define GRENADETYPE_SMOKE			1
-#define GRENADETYPE_FLASH			2
+#include "utlmap.h"
 
-#define SPAWNFLAG_NOMESSAGE			1
-#define SPAWNFLAG_NOTOUCH			1
-#define SPAWNFLAG_DROIDONLY			4
-
-#define MAX_ITEM_COUNTS				32
-#define MAX_ENTITY					512	// We can only ever move 512 entities across a transition
-
-// triggers
-#define SF_TRIGGER_ALLOWMONSTERS		1	// monsters allowed to fire this trigger
-#define SF_TRIGGER_NOCLIENTS			2	// players not allowed to fire this trigger
-#define SF_TRIGGER_PUSHABLES			4	// only pushables can fire this trigger
-#define SF_TRIGGER_NO_RESET			64	// it is not allowed to be restarted on a new round
-
-#define SF_TRIGGER_PUSH_ONCE			1
-#define SF_TRIGGER_PUSH_START_OFF		2	// spawnflag that makes trigger_push spawn turned OFF
-
-#define SF_TRIGGER_HURT_TARGETONCE		1	// Only fire hurt target once
-#define SF_TRIGGER_HURT_START_OFF		2	// spawnflag that makes trigger_push spawn turned OFF
-#define SF_TRIGGER_HURT_NO_CLIENTS		8	// spawnflag that makes trigger_push spawn turned OFF
-#define SF_TRIGGER_HURT_CLIENTONLYFIRE		16	// trigger hurt will only fire its target if it is hurting a client
-#define SF_TRIGGER_HURT_CLIENTONLYTOUCH		32	// only clients may touch this trigger.
-
-#define SF_AUTO_FIREONCE			0x0001
-#define SF_AUTO_NO_RESET			0x0002
-
-#define SF_RELAY_FIREONCE			0x0001
-#define SF_ENDSECTION_USEONLY			0x0001
-
-#define SF_MULTIMAN_CLONE			0x80000000
-#define SF_MULTIMAN_THREAD			0x00000001
-
-#define SF_CHANGELEVEL_USEONLY			0x0002
-#define SF_CAMERA_PLAYER_POSITION		1
-#define SF_CAMERA_PLAYER_TARGET			2
-#define SF_CAMERA_PLAYER_TAKECONTROL		4
-
-// Flags to indicate masking off various render parameters that are normally copied to the targets
-#define SF_RENDER_MASKFX	(1 << 0)
-#define SF_RENDER_MASKAMT	(1 << 1)
-#define SF_RENDER_MASKMODE	(1 << 2)
-#define SF_RENDER_MASKCOLOR	(1 << 3)
-
-class CFrictionModifier: public CBaseEntity
-{
-	DECLARE_CLASS_TYPES(CFrictionModifier, CBaseEntity);
+class CFrictionModifier: public CBaseEntity {
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -85,11 +41,12 @@ public:
 	float m_frictionFraction;
 };
 
+#define SF_AUTO_FIREONCE BIT(0)
+#define SF_AUTO_NORESET  BIT(1)
+
 // This trigger will fire when the level spawns (or respawns if not fire once)
-// It will check a global state before firing.  It supports delay and killtargets
-class CAutoTrigger: public CBaseDelay
-{
-	DECLARE_CLASS_TYPES(CAutoTrigger, CBaseDelay);
+// It will check a global state before firing. It supports delay and killtargets
+class CAutoTrigger: public CBaseDelay {
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -101,12 +58,12 @@ public:
 	virtual void Think() = 0;
 public:
 	int m_globalstate;
-	USE_TYPE triggerType;
+	USE_TYPE m_triggerType;
 };
 
-class CTriggerRelay: public CBaseDelay
-{
-	DECLARE_CLASS_TYPES(CTriggerRelay, CBaseDelay);
+#define SF_RELAY_FIREONCE BIT(0)
+
+class CTriggerRelay: public CBaseDelay {
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -115,16 +72,18 @@ public:
 	virtual int ObjectCaps() = 0;
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) = 0;
 public:
-	USE_TYPE triggerType;
+	USE_TYPE m_triggerType;
 };
 
-// The Multimanager Entity - when fired, will fire up to 16 targets
-// at specified times.
+const int MAX_MM_TARGETS = 16; // maximum number of targets a single multi_manager entity may be assigned.
+
+#define SF_MULTIMAN_THREAD BIT(0)
+#define SF_MULTIMAN_CLONE  BIT(31)
+
+// This entity when fire, will fire up to 16 targets at specified times.
 // FLAG:		THREAD (create clones when triggered)
 // FLAG:		CLONE (this is a clone for a threaded execution)
-class CMultiManager: public CBaseToggle
-{
-	DECLARE_CLASS_TYPES(CMultiManager, CBaseToggle);
+class CMultiManager: public CBaseToggle {
 public:
 	virtual void Spawn() = 0;
 	virtual void Restart() = 0;
@@ -137,54 +96,71 @@ public:
 	int m_cTargets;
 	int m_index;
 	float m_startTime;
-	int m_iTargetName[MAX_MULTI_TARGETS];
-	float m_flTargetDelay[MAX_MULTI_TARGETS];
+	int m_iTargetName[MAX_MM_TARGETS];
+	float m_flTargetDelay[MAX_MM_TARGETS];
 };
+
+// Flags to indicate masking off various render parameters that are normally copied to the targets
+#define SF_RENDER_MASKFX    BIT(0)
+#define SF_RENDER_MASKAMT   BIT(1)
+#define SF_RENDER_MASKMODE  BIT(2)
+#define SF_RENDER_MASKCOLOR BIT(3)
 
 // Render parameters trigger
-//
 // This entity will copy its render parameters (renderfx, rendermode, rendercolor, renderamt)
 // to its targets when triggered.
-class CRenderFxManager: public CBaseEntity
-{
-	DECLARE_CLASS_TYPES(CRenderFxManager, CBaseEntity);
+class CRenderFxManager: public CBaseEntity {
 public:
 	virtual void Spawn() = 0;
+	virtual void Restart() = 0;
+	virtual void UpdateOnRemove() = 0;
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) = 0;
+public:
+	struct RenderGroup_t
+	{
+		int rendermode;
+		float renderamt;
+		Vector rendercolor;
+		int renderfx;
+	};
+	CUtlMap<int, RenderGroup_t> m_RenderGroups;
 };
 
-class CBaseTrigger: public CBaseToggle
-{
-	DECLARE_CLASS_TYPES(CBaseTrigger, CBaseToggle);
+#define SF_TRIGGER_ALLOWMONSTERS BIT(0) // monsters allowed to fire this trigger
+#define SF_TRIGGER_NOCLIENTS     BIT(1) // players not allowed to fire this trigger
+#define SF_TRIGGER_PUSHABLES     BIT(2) // only pushables can fire this trigger
+#define SF_TRIGGER_NORESET       BIT(6) // it is not allowed to be resetting on a new round
+
+class CBaseTrigger: public CBaseToggle {
 public:
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
 	virtual int ObjectCaps() = 0;
 };
 
-// trigger_hurt - hurts anything that touches it. if the trigger has a targetname, firing it will toggle state
-// int gfToggleState = 0; // used to determine when all radiation trigger hurts have called 'RadiationThink'
-class CTriggerHurt: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CTriggerHurt, CBaseTrigger);
+#define SF_TRIGGER_HURT_TARGETONCE      BIT(0) // Only fire hurt target once
+#define SF_TRIGGER_HURT_START_OFF       BIT(1) // spawnflag that makes trigger_push spawn turned OFF
+#define SF_TRIGGER_HURT_NO_CLIENTS      BIT(3) // spawnflag that makes trigger_push spawn turned OFF
+#define SF_TRIGGER_HURT_CLIENTONLYFIRE  BIT(4) // trigger hurt will only fire its target if it is hurting a client
+#define SF_TRIGGER_HURT_CLIENTONLYTOUCH BIT(5) // only clients may touch this trigger.
+
+// Hurts anything that touches it.
+// If the trigger has a targetname, firing it will toggle state
+class CTriggerHurt: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 	virtual void Restart() = 0;
 	virtual int ObjectCaps() = 0;
 };
 
-class CTriggerMonsterJump: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CTriggerMonsterJump, CBaseTrigger);
+class CTriggerMonsterJump: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 	virtual void Think() = 0;
 	virtual void Touch(CBaseEntity *pOther) = 0;
 };
 
-// trigger_cdaudio - starts/stops cd audio tracks
-class CTriggerCDAudio: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CTriggerCDAudio, CBaseTrigger);
+// Starts/stops cd audio tracks
+class CTriggerCDAudio: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 	virtual void Touch(CBaseEntity *pOther) = 0;
@@ -192,9 +168,7 @@ public:
 };
 
 // This plays a CD track when fired or when the player enters it's radius
-class CTargetCDAudio: public CPointEntity
-{
-	DECLARE_CLASS_TYPES(CTargetCDAudio, CPointEntity);
+class CTargetCDAudio: public CPointEntity {
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -202,7 +176,6 @@ public:
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) = 0;
 };
 
-// QUAKED trigger_multiple (.5 .5 .5) ? notouch
 // Variable sized repeatable trigger.  Must be targeted at one or more entities.
 // If "health" is set, the trigger must be killed to activate each time.
 // If "delay" is set, the trigger waits some time after activating before firing.
@@ -216,56 +189,44 @@ public:
 // 4)
 // NEW
 // if a trigger has a NETNAME, that NETNAME will become the TARGET of the triggered object.
-class CTriggerMultiple: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CTriggerMultiple, CBaseTrigger);
+class CTriggerMultiple: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 };
 
-// QUAKED trigger_once (.5 .5 .5) ? notouch
-// Variable sized trigger. Triggers once, then removes itself.  You must set the key "target" to the name of another object in the level that has a matching
-// "targetname".  If "health" is set, the trigger must be killed to activate.
+// Variable sized trigger. Triggers once, then removes itself. You must set the key "target" to the name of another object in the level that has a matching
+// "targetname". If "health" is set, the trigger must be killed to activate.
 // If notouch is set, the trigger is only fired by other entities, not by touching.
 // if "killtarget" is set, any objects that have a matching "target" will be removed when the trigger is fired.
-// if "angle" is set, the trigger will only fire when someone is facing the direction of the angle.  Use "360" for an angle of 0.
+// if "angle" is set, the trigger will only fire when someone is facing the direction of the angle. Use "360" for an angle of 0.
 // sounds
 // 1)	secret
 // 2)	beep beep
 // 3)	large switch
 // 4)
-class CTriggerOnce: public CTriggerMultiple
-{
-	DECLARE_CLASS_TYPES(CTriggerOnce, CTriggerMultiple);
+class CTriggerOnce: public CTriggerMultiple {
 public:
 	virtual void Spawn() = 0;
 	virtual void Restart() = 0;
 };
 
-// QUAKED trigger_counter (.5 .5 .5) ? nomessage
 // Acts as an intermediary for an action that takes multiple inputs.
 // If nomessage is not set, it will print "1 more.. " etc when triggered and
-// "sequence complete" when finished.  After the counter has been triggered "cTriggersLeft"
+// "sequence complete" when finished. After the counter has been triggered "cTriggersLeft"
 // times (default 2), it will fire all of it's targets and remove itself.
-class CTriggerCounter: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CTriggerCounter, CBaseTrigger);
+class CTriggerCounter: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 };
 
 // Derive from point entity so this doesn't move across levels
-class CTriggerVolume: public CPointEntity
-{
-	DECLARE_CLASS_TYPES(CTriggerVolume, CPointEntity);
+class CTriggerVolume: public CPointEntity {
 public:
 	virtual void Spawn() = 0;
 };
 
 // Fires a target after level transition and then dies
-class CFireAndDie: public CBaseDelay
-{
-	DECLARE_CLASS_TYPES(CFireAndDie, CBaseDelay);
+class CFireAndDie: public CBaseDelay {
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -273,111 +234,91 @@ public:
 	virtual void Think() = 0;
 };
 
-// QUAKED trigger_changelevel (0.5 0.5 0.5) ? NO_INTERMISSION
-// When the player touches this, he gets sent to the map listed in the "map" variable.  Unless the NO_INTERMISSION flag is set, the view will go to the info_intermission spot and display stats.
-class CChangeLevel: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CChangeLevel, CBaseTrigger);
+#define SF_CHANGELEVEL_USEONLY BIT(1)
+
+// When the player touches this, he gets sent to the map listed in the "map" variable.
+// Unless the NO_INTERMISSION flag is set, the view will go to the info_intermission spot and display stats.
+class CChangeLevel: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
 	virtual int Save(CSave &save) = 0;
 	virtual int Restore(CRestore &restore) = 0;
 public:
-	char m_szMapName[cchMapNameMost];		// trigger_changelevel only:  next map
-	char m_szLandmarkName[cchMapNameMost];		// trigger_changelevel only:  landmark on next map
+	char m_szMapName[MAX_MAPNAME_LENGHT];		// next map
+	char m_szLandmarkName[MAX_MAPNAME_LENGHT];	// landmark on next map
 	int m_changeTarget;
 	float m_changeTargetDelay;
 };
 
-class CLadder: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CLadder, CBaseTrigger);
+class CLadder: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
 };
 
-class CTriggerPush: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CTriggerPush, CBaseTrigger);
+#define SF_TRIGGER_PUSH_ONCE      BIT(0)
+#define SF_TRIGGER_PUSH_START_OFF BIT(1) // spawnflag that makes trigger_push spawn turned OFF
+
+class CTriggerPush: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 	virtual void Restart() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
-	virtual int ObjectCaps() = 0;
 	virtual void Touch(CBaseEntity *pOther) = 0;
 };
 
-class CTriggerTeleport: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CTriggerTeleport, CBaseTrigger);
+class CTriggerTeleport: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 };
 
-class CBuyZone: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CBuyZone, CBaseTrigger);
+class CBuyZone: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 };
 
-class CBombTarget: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CBombTarget, CBaseTrigger);
+class CBombTarget: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 };
 
-class CHostageRescue: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CHostageRescue, CBaseTrigger);
+class CHostageRescue: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 };
 
-class CEscapeZone: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CEscapeZone, CBaseTrigger);
+class CEscapeZone: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 };
 
-class CVIP_SafetyZone: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CVIP_SafetyZone, CBaseTrigger);
+class CVIP_SafetyZone: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 };
 
-class CTriggerSave: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CTriggerSave, CBaseTrigger);
+class CTriggerSave: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 };
 
-class CTriggerEndSection: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CTriggerEndSection, CBaseTrigger);
+#define SF_ENDSECTION_USEONLY BIT(0)
+
+class CTriggerEndSection: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
 };
 
-class CTriggerGravity: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CTriggerGravity, CBaseTrigger);
+class CTriggerGravity: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 };
 
 // this is a really bad idea.
-class CTriggerChangeTarget: public CBaseDelay
-{
-	DECLARE_CLASS_TYPES(CTriggerChangeTarget, CBaseDelay);
+class CTriggerChangeTarget: public CBaseDelay {
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -389,9 +330,11 @@ private:
 	int m_iszNewTarget;
 };
 
-class CTriggerCamera: public CBaseDelay
-{
-	DECLARE_CLASS_TYPES(CTriggerCamera, CBaseDelay);
+#define SF_CAMERA_PLAYER_POSITION    BIT(0)
+#define SF_CAMERA_PLAYER_TARGET      BIT(1)
+#define SF_CAMERA_PLAYER_TAKECONTROL BIT(2)
+
+class CTriggerCamera: public CBaseDelay {
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -415,16 +358,12 @@ public:
 	int m_state;
 };
 
-class CWeather: public CBaseTrigger
-{
-	DECLARE_CLASS_TYPES(CWeather, CBaseTrigger);
+class CWeather: public CBaseTrigger {
 public:
 	virtual void Spawn() = 0;
 };
 
-class CClientFog: public CBaseEntity
-{
-	DECLARE_CLASS_TYPES(CClientFog, CBaseEntity);
+class CClientFog: public CBaseEntity {
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
