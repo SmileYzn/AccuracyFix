@@ -12,6 +12,16 @@
 <p>For example, if you aim at head, that update the traceline position from attacker to head of victim player.</p>
 <p>It also can control weapons recoil, but that is not the real objective of plugin!</p>
 
+<h3>ReHLDS / ReGameDLL_CS</h3>
+<p>
+    This metamod plugin runs on latest action build of ReHLDS / ReGameDLL_CS versions!
+    <br>
+    <br>To download latest ReHLDS: <a href="https://github.com/dreamstalker/rehlds/actions?query=branch%3Amaster+is%3Asuccess+event%3Apush">Lastest Action (Master Builds) of ReHLDS here</a>
+    <br>To download latest ReGameDLL_CS: <a href="https://github.com/s1lentq/ReGameDLL_CS/actions?query=is%3Asuccess+branch%3Amaster+event%3Apush">Lastest Action (Master Builds) of ReHLDS here</a>
+</p>
+
+
+
 ------
 
 <h3>Settings and variables</h3>
