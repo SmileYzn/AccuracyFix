@@ -43,11 +43,21 @@ const char* CAccuracyUtil::GetPath()
 
 				std::replace(this->m_Path.begin(), this->m_Path.end(), (char)(92), (char)(47));
 
-				this->m_Path.erase(this->m_Path.find_last_of((char)(47)), this->m_Path.length());
+				auto Position = this->m_Path.find_last_of((char)(47));
 
+				if (Position != std::string::npos)
+				{
+					this->m_Path.erase(Position, this->m_Path.length());
+				}
+				
 				while (std::count(this->m_Path.begin(), this->m_Path.end(), (char)(47)) > 1)
 				{
-					this->m_Path.erase(this->m_Path.find_last_of((char)(47)), this->m_Path.length());
+					Position = this->m_Path.find_last_of((char)(47));
+
+					if (Position != std::string::npos)
+					{
+						this->m_Path.erase(this->m_Path.find_last_of((char)(47)), this->m_Path.length());
+					}
 				}
 			}
 		}
