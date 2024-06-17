@@ -14,6 +14,8 @@ void CAccuracyFix::ServerActivate()
 	this->m_af_recoil_all = gAccuracyUtil.CvarRegister("af_recoil_all", "-1.0");
 #endif
 
+	char cvarName[64] = { 0 };
+
 	for (int WeaponID = WEAPON_P228; WeaponID <= WEAPON_P90; WeaponID++)
 	{
 		auto SlotInfo = g_ReGameApi->GetWeaponSlot((WeaponIdType)WeaponID);
@@ -26,8 +28,6 @@ void CAccuracyFix::ServerActivate()
 				{
 					if (SlotInfo->weaponName[0u] != '\0')
 					{
-						char cvarName[64] = { 0 };
-
 						Q_snprintf(cvarName, sizeof(cvarName), "af_distance_%s", SlotInfo->weaponName);
 
 						this->m_af_distance[WeaponID] = gAccuracyUtil.CvarRegister(cvarName, "8192.0");
@@ -110,26 +110,29 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 
 								if (DistanceLimit > 0.0f)
 								{
-									auto trResult = gAccuracyUtil.GetUserAiming(pentToSkip, DistanceLimit);
-
-									if (!FNullEnt(trResult.pHit))
+									if (Player->pev->flags & FL_ONGROUND)
 									{
-										auto TargetIndex = ENTINDEX(trResult.pHit);
-
-										if (TargetIndex > 0 && TargetIndex <= gpGlobals->maxClients)
+										auto trResult = gAccuracyUtil.GetUserAiming(pentToSkip, DistanceLimit);
+	
+										if (!FNullEnt(trResult.pHit))
 										{
-											auto fwdVelocity = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
-
-											if (this->m_af_accuracy_all->value > 0.0f)
+											auto TargetIndex = ENTINDEX(trResult.pHit);
+	
+											if (TargetIndex > 0 && TargetIndex <= gpGlobals->maxClients)
 											{
-												fwdVelocity = this->m_af_accuracy_all->value;
+												auto fwdVelocity = this->m_af_accuracy[Player->m_pActiveItem->m_iId]->value;
+	
+												if (this->m_af_accuracy_all->value > 0.0f)
+												{
+													fwdVelocity = this->m_af_accuracy_all->value;
+												}
+	
+												g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
+	
+												auto vEndRes = (Vector)vStart + gpGlobals->v_forward * fwdVelocity;
+	
+												g_engfuncs.pfnTraceLine(vStart, vEndRes, fNoMonsters, pentToSkip, ptr);
 											}
-
-											g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
-
-											auto vEndRes = (Vector)vStart + gpGlobals->v_forward * fwdVelocity;
-
-											g_engfuncs.pfnTraceLine(vStart, vEndRes, fNoMonsters, pentToSkip, ptr);
 										}
 									}
 								}
