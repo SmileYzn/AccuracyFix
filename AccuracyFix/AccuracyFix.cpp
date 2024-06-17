@@ -114,7 +114,7 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 									{
 										auto trResult = gAccuracyUtil.GetUserAiming(pentToSkip, DistanceLimit);
 	
-										if (!FNullEnt(trResult.pHit))
+										if (!FNullEnt(trResult.pHit) && (trResult.flFraction == 1.0))
 										{
 											auto TargetIndex = ENTINDEX(trResult.pHit);
 	
