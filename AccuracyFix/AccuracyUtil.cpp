@@ -63,6 +63,11 @@ const char* CAccuracyUtil::GetPath()
 		}
 	}
 
+	if (!this->m_Path.empty())
+	{
+		g_engfuncs.pfnServerPrint(PLID,"[%s] %s", __func__, this->m_Path.c_str());
+	}
+
 	return this->m_Path.c_str();
 }
 
