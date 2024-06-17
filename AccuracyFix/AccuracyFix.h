@@ -29,7 +29,7 @@ private:
 
 	cvar_t* m_af_recoil_all;
 	std::array<cvar_t*, MAX_WEAPONS + 1> m_af_recoil;
-#endif;
+#endif
 };
 
 extern CAccuracyFix gAccuracyFix;
