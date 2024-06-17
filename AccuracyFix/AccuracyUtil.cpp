@@ -56,7 +56,7 @@ const char* CAccuracyUtil::GetPath()
 
 					if (Position != std::string::npos)
 					{
-						this->m_Path.erase(this->m_Path.find_last_of((char)(47)), this->m_Path.length());
+						this->m_Path.erase(Position, this->m_Path.length());
 					}
 				}
 			}
