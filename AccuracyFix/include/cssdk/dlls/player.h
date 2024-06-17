@@ -33,106 +33,106 @@
 #include "hintmessage.h"
 #include "unisignals.h"
 
-#define SOUND_FLASHLIGHT_ON  "items/flashlight1.wav"
-#define SOUND_FLASHLIGHT_OFF "items/flashlight1.wav"
+#define MIN_BUY_TIME			15	// the minimum threshold values for cvar mp_buytime 15 sec's
 
-const int MAX_PLAYER_NAME_LENGTH    = 32;
-const int MAX_AUTOBUY_LENGTH        = 256;
-const int MAX_REBUY_LENGTH          = 256;
+#define MAX_BUFFER_MENU			175
+#define MAX_BUFFER_MENU_BRIEFING	50
 
-const int MAX_RECENT_PATH           = 20;
-const int MAX_HOSTAGE_ICON          = 4;	// the maximum number of icons of the hostages in the HUD
+#define MAX_PLAYER_NAME_LENGTH		32
+#define MAX_AUTOBUY_LENGTH		256
+#define MAX_REBUY_LENGTH		256
 
-const int MAX_SUIT_NOREPEAT         = 32;
-const int MAX_SUIT_PLAYLIST         = 4;	// max of 4 suit sentences queued up at any time
+#define MAX_RECENT_PATH			20
+#define MAX_HOSTAGE_ICON		4	// the maximum number of icons of the hostages in the HUD
 
-const int MAX_BUFFER_MENU           = 175;
-const int MAX_BUFFER_MENU_BRIEFING  = 50;
+#define SUITUPDATETIME			3.5
+#define SUITFIRSTUPDATETIME		0.1
 
-const float SUIT_UPDATE_TIME        = 3.5f;
-const float SUIT_FIRST_UPDATE_TIME  = 0.1f;
+#define PLAYER_FATAL_FALL_SPEED		1100.0f
+#define PLAYER_MAX_SAFE_FALL_SPEED	500.0f
+#define PLAYER_USE_RADIUS		64.0f
 
-const float MAX_PLAYER_FATAL_FALL_SPEED = 1100.0f;
-const float MAX_PLAYER_SAFE_FALL_SPEED  = 500.0f;
-const float MAX_PLAYER_USE_RADIUS       = 64.0f;
+#define ARMOR_RATIO			0.5	// Armor Takes 50% of the damage
+#define ARMOR_BONUS			0.5	// Each Point of Armor is work 1/x points of health
 
-const float ARMOR_RATIO = 0.5f;			// Armor Takes 50% of the damage
-const float ARMOR_BONUS = 0.5f;			// Each Point of Armor is work 1/x points of health
-
-const float FLASH_DRAIN_TIME = 1.2f;	// 100 units/3 minutes
-const float FLASH_CHARGE_TIME = 0.2f;	// 100 units/20 seconds (seconds per unit)
+#define FLASH_DRAIN_TIME		1.2	// 100 units/3 minutes
+#define FLASH_CHARGE_TIME		0.2	// 100 units/20 seconds  (seconds per unit)
 
 // damage per unit per second.
-const float DAMAGE_FOR_FALL_SPEED   = 100.0f / (MAX_PLAYER_FATAL_FALL_SPEED - MAX_PLAYER_SAFE_FALL_SPEED);
-const float PLAYER_MIN_BOUNCE_SPEED = 350.0f;
+#define DAMAGE_FOR_FALL_SPEED		100.0f / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED)
+#define PLAYER_MIN_BOUNCE_SPEED		350.0f
 
 // won't punch player's screen/make scrape noise unless player falling at least this fast.
-const float PLAYER_FALL_PUNCH_THRESHHOLD = 250.0f;
+#define PLAYER_FALL_PUNCH_THRESHHOLD	250.0f
 
 // Money blinks few of times on the freeze period
 // NOTE: It works for CZ
-const int MONEY_BLINK_AMOUNT = 30;
-
-// Player time based damage
-#define AIRTIME                 12		// lung full of air lasts this many seconds
-#define PARALYZE_DURATION       2		// number of 2 second intervals to take damage
-#define PARALYZE_DAMAGE         1.0f	// damage to take each 2 second interval
-
-#define NERVEGAS_DURATION       2
-#define NERVEGAS_DAMAGE         5.0f
-
-#define POISON_DURATION         5
-#define POISON_DAMAGE           2.0f
-
-#define RADIATION_DURATION      2
-#define RADIATION_DAMAGE        1.0f
-
-#define ACID_DURATION           2
-#define ACID_DAMAGE             5.0f
-
-#define SLOWBURN_DURATION       2
-#define SLOWBURN_DAMAGE         1.0f
-
-#define SLOWFREEZE_DURATION     2
-#define SLOWFREEZE_DAMAGE       1.0f
+#define MONEY_BLINK_AMOUNT		30
 
 // Player physics flags bits
 // CBasePlayer::m_afPhysicsFlags
-#define PFLAG_ONLADDER          BIT(0)
-#define PFLAG_ONSWING           BIT(0)
-#define PFLAG_ONTRAIN           BIT(1)
-#define PFLAG_ONBARNACLE        BIT(2)
-#define PFLAG_DUCKING           BIT(3) // In the process of ducking, but totally squatted yet
-#define PFLAG_USING             BIT(4) // Using a continuous entity
-#define PFLAG_OBSERVER          BIT(5) // player is locked in stationary cam mode. Spectators can move, observers can't.
+#define PFLAG_ONLADDER			(1<<0)
+#define PFLAG_ONSWING			(1<<0)
+#define PFLAG_ONTRAIN			(1<<1)
+#define PFLAG_ONBARNACLE		(1<<2)
+#define PFLAG_DUCKING			(1<<3)	// In the process of ducking, but totally squatted yet
+#define PFLAG_USING			(1<<4)	// Using a continuous entity
+#define PFLAG_OBSERVER			(1<<5)	// player is locked in stationary cam mode. Spectators can move, observers can't.
 
-#define TRAIN_OFF               0x00
-#define TRAIN_NEUTRAL           0x01
-#define TRAIN_SLOW              0x02
-#define TRAIN_MEDIUM            0x03
-#define TRAIN_FAST              0x04
-#define TRAIN_BACK              0x05
+#define TRAIN_OFF			0x00
+#define TRAIN_NEUTRAL			0x01
+#define TRAIN_SLOW			0x02
+#define TRAIN_MEDIUM			0x03
+#define TRAIN_FAST			0x04
+#define TRAIN_BACK			0x05
 
-#define TRAIN_ACTIVE            0x80
-#define TRAIN_NEW               0xc0
+#define TRAIN_ACTIVE			0x80
+#define TRAIN_NEW			0xc0
 
-const bool SUIT_GROUP           = true;
-const bool SUIT_SENTENCE        = false;
+#define SIGNAL_BUY			(1<<0)
+#define SIGNAL_BOMB			(1<<1)
+#define SIGNAL_RESCUE			(1<<2)
+#define SIGNAL_ESCAPE			(1<<3)
+#define SIGNAL_VIPSAFETY		(1<<4)
 
-const int  SUIT_REPEAT_OK       = 0;
-const int  SUIT_NEXT_IN_30SEC	= 30;
-const int  SUIT_NEXT_IN_1MIN    = 60;
-const int  SUIT_NEXT_IN_5MIN    = 300;
-const int  SUIT_NEXT_IN_10MIN   = 600;
-const int  SUIT_NEXT_IN_30MIN   = 1800;
-const int  SUIT_NEXT_IN_1HOUR   = 3600;
+#define IGNOREMSG_NONE			0
+#define IGNOREMSG_ENEMY			1
+#define IGNOREMSG_TEAM			2
 
-const int MAX_TEAM_NAME_LENGTH  = 16;
+// max of 4 suit sentences queued up at any time
+#define CSUITPLAYLIST			4
 
-const auto AUTOAIM_2DEGREES     = 0.0348994967025;
-const auto AUTOAIM_5DEGREES     = 0.08715574274766;
-const auto AUTOAIM_8DEGREES     = 0.1391731009601;
-const auto AUTOAIM_10DEGREES    = 0.1736481776669;
+#define SUIT_GROUP			TRUE
+#define SUIT_SENTENCE			FALSE
+
+#define SUIT_REPEAT_OK			0
+#define SUIT_NEXT_IN_30SEC		30
+#define SUIT_NEXT_IN_1MIN		60
+#define SUIT_NEXT_IN_5MIN		300
+#define SUIT_NEXT_IN_10MIN		600
+#define SUIT_NEXT_IN_30MIN		1800
+#define SUIT_NEXT_IN_1HOUR		3600
+
+#define TEAM_NAME_LENGTH		16
+
+#define MAX_ID_RANGE			2048.0f
+#define MAX_SPECTATOR_ID_RANGE		8192.0f
+#define SBAR_STRING_SIZE		128
+
+#define SBAR_TARGETTYPE_TEAMMATE	1
+#define SBAR_TARGETTYPE_ENEMY		2
+#define SBAR_TARGETTYPE_HOSTAGE		3
+
+#define CHAT_INTERVAL			1.0f
+#define CSUITNOREPEAT			32
+
+#define AUTOAIM_2DEGREES		0.0348994967025
+#define AUTOAIM_5DEGREES		0.08715574274766
+#define AUTOAIM_8DEGREES		0.1391731009601
+#define AUTOAIM_10DEGREES		0.1736481776669
+
+#define SOUND_FLASHLIGHT_ON		"items/flashlight1.wav"
+#define SOUND_FLASHLIGHT_OFF		"items/flashlight1.wav"
 
 // custom enum
 enum RewardType
@@ -236,13 +236,6 @@ enum TrackCommands
 	COMMANDS_TO_TRACK,
 };
 
-enum IgnoreChatMsg : int
-{
-	IGNOREMSG_NONE,
-	IGNOREMSG_ENEMY,
-	IGNOREMSG_TEAM
-};
-
 struct RebuyStruct
 {
 	int m_primaryWeapon;
@@ -268,14 +261,6 @@ enum ThrowDirection
 	THROW_HITVEL_MINUS_AIRVEL
 };
 
-const float MAX_ID_RANGE            = 2048.0f;
-const float MAX_SPEC_ID_RANGE       = 8192.0f;
-const int   MAX_SBAR_STRING         = 128;
-
-const int SBAR_TARGETTYPE_TEAMMATE  = 1;
-const int SBAR_TARGETTYPE_ENEMY     = 2;
-const int SBAR_TARGETTYPE_HOSTAGE   = 3;
-
 enum sbar_data
 {
 	SBAR_ID_TARGETTYPE = 1,
@@ -288,20 +273,26 @@ enum MusicState { SILENT, CALM, INTENSE };
 
 class CCSPlayer;
 
-class CStripWeapons: public CPointEntity {
+class CStripWeapons: public CPointEntity
+{
+	DECLARE_CLASS_TYPES(CStripWeapons, CPointEntity);
 public:
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) = 0;
 };
 
 // Multiplayer intermission spots.
-class CInfoIntermission: public CPointEntity {
+class CInfoIntermission: public CPointEntity
+{
+	DECLARE_CLASS_TYPES(CInfoIntermission, CPointEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void Think() = 0;
 };
 
 // Dead HEV suit prop
-class CDeadHEV: public CBaseMonster {
+class CDeadHEV: public CBaseMonster
+{
+	DECLARE_CLASS_TYPES(CDeadHEV, CBaseMonster);
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -311,17 +302,23 @@ public:
 	static char *m_szPoses[4];
 };
 
-class CSprayCan: public CBaseEntity {
+class CSprayCan: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CSprayCan, CBaseEntity);
 public:
 	virtual void Think() = 0;
 	virtual int ObjectCaps() = 0;
 };
 
-class CBloodSplat: public CBaseEntity {
+class CBloodSplat: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CBloodSplat, CBaseEntity);
 public:
 };
 
-class CBasePlayer: public CBaseMonster {
+class CBasePlayer: public CBaseMonster
+{
+	DECLARE_CLASS_TYPES(CBasePlayer, CBaseMonster);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -337,7 +334,7 @@ public:
 	virtual void AddPointsToTeam(int score, BOOL bAllowNegativeScore) = 0;
 	virtual BOOL AddPlayerItem(CBasePlayerItem *pItem) = 0;
 	virtual BOOL RemovePlayerItem(CBasePlayerItem *pItem) = 0;
-	virtual int GiveAmmo(int iAmount, const char *szName, int iMax = -1) = 0;
+	virtual int GiveAmmo(int iAmount, char *szName, int iMax = -1) = 0;
 	virtual void StartSneaking() = 0;
 	virtual void UpdateOnRemove() = 0;
 	virtual BOOL IsSneaking() = 0;
@@ -380,30 +377,32 @@ public:
 	CCSPlayer *CSPlayer() const;
 
 	// templates
-	template<typename Functor>
-	CBasePlayerItem *ForEachItem(int slot, const Functor &func)
+	template<typename T = CBasePlayerItem, typename Functor>
+	T *ForEachItem(int slot, const Functor &func)
 	{
 		auto item = m_rgpPlayerItems[ slot ];
 		while (item)
 		{
-			if (func(item))
-				return item;
+			auto next = item->m_pNext;
+			if (func(static_cast<T *>(item)))
+				return static_cast<T *>(item);
 
-			item = item->m_pNext;
+			item = next;
 		}
 		return nullptr;
 	}
-	template<typename Functor>
-	CBasePlayerItem *ForEachItem(const Functor &func)
+	template<typename T = CBasePlayerItem, typename Functor>
+	T *ForEachItem(const Functor &func)
 	{
 		for (auto item : m_rgpPlayerItems)
 		{
 			while (item)
 			{
-				if (func(item))
-					return item;
+				auto next = item->m_pNext;
+				if (func(static_cast<T *>(item)))
+					return static_cast<T *>(item);
 
-				item = item->m_pNext;
+				item = next;
 			}
 		}
 		return nullptr;
@@ -444,7 +443,7 @@ public:
 	bool m_bTeamChanged;
 	ModelName m_iModelName;
 	int m_iTeamKills;
-	IgnoreChatMsg m_iIgnoreGlobalChat;
+	int m_iIgnoreGlobalChat;
 	bool m_bHasNightVision;
 	bool m_bNightVisionOn;
 	Vector m_vRecentPath[MAX_RECENT_PATH];
@@ -510,10 +509,10 @@ public:
 	float m_flDuckTime;
 	float m_flWallJumpTime;
 	float m_flSuitUpdate;
-	int m_rgSuitPlayList[MAX_SUIT_PLAYLIST];
+	int m_rgSuitPlayList[CSUITPLAYLIST];
 	int m_iSuitPlayNext;
-	int m_rgiSuitNoRepeat[MAX_SUIT_NOREPEAT];
-	float m_rgflSuitNoRepeatTime[MAX_SUIT_NOREPEAT];
+	int m_rgiSuitNoRepeat[CSUITNOREPEAT];
+	float m_rgflSuitNoRepeatTime[CSUITNOREPEAT];
 	int m_lastDamageAmount;
 	float m_tbdPrev;
 	float m_flgeigerRange;
@@ -555,12 +554,12 @@ public:
 	int m_izSBarState[SBAR_END];
 	float m_flNextSBarUpdateTime;
 	float m_flStatusBarDisappearDelay;
-	char m_SbarString0[MAX_SBAR_STRING];
+	char m_SbarString0[SBAR_STRING_SIZE];
 	int m_lastx;
 	int m_lasty;
 	int m_nCustomSprayFrames;
 	float m_flNextDecalTime;
-	char m_szTeamName[MAX_TEAM_NAME_LENGTH];
+	char m_szTeamName[TEAM_NAME_LENGTH];
 	int m_modelIndexPlayer;
 	char m_szAnimExtention[32];
 	int m_iGaitsequence;
@@ -599,16 +598,21 @@ public:
 	float m_silentTimestamp;
 	MusicState m_musicState;
 	float m_flLastCommandTime[COMMANDS_TO_TRACK];
+	int m_iLastAccount;
+	int m_iLastClientHealth;
+	float m_tmNextAccountHealthUpdate;
 };
 
-class CWShield: public CBaseEntity {
+class CWShield: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CWShield, CBaseEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void Touch(CBaseEntity *pOther) = 0;
 public:
 	void SetCantBePickedUpByUser(CBaseEntity *pEntity, float time) { m_hEntToIgnoreTouchesFrom = pEntity; m_flTimeToIgnoreTouches = gpGlobals->time + time; }
 public:
-	EntityHandle<CBasePlayer> m_hEntToIgnoreTouchesFrom;
+	EHANDLE m_hEntToIgnoreTouchesFrom;
 	float m_flTimeToIgnoreTouches;
 };
 

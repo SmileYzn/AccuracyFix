@@ -30,45 +30,44 @@
 
 class CBasePlayer;
 
-const float MAX_NORMAL_BATTERY    = 100.0f;
-const float MAX_DIST_RELOAD_SOUND = 512.0f;
+#define MAX_WEAPONS			32
+#define MAX_NORMAL_BATTERY		100.0f
+#define DISTANCE_RELOAD_SOUND		512.0f
 
-#define MAX_WEAPONS                 32
+#define ITEM_FLAG_SELECTONEMPTY		1
+#define ITEM_FLAG_NOAUTORELOAD		2
+#define ITEM_FLAG_NOAUTOSWITCHEMPTY	4
+#define ITEM_FLAG_LIMITINWORLD		8
+#define ITEM_FLAG_EXHAUSTIBLE		16	// A player can totally exhaust their ammo supply and lose this weapon
 
-#define ITEM_FLAG_SELECTONEMPTY     1
-#define ITEM_FLAG_NOAUTORELOAD      2
-#define ITEM_FLAG_NOAUTOSWITCHEMPTY 4
-#define ITEM_FLAG_LIMITINWORLD      8
-#define ITEM_FLAG_EXHAUSTIBLE       16 // A player can totally exhaust their ammo supply and lose this weapon
-
-#define WEAPON_IS_ONTARGET          0x40
+#define WEAPON_IS_ONTARGET		0x40
 
 // the maximum amount of ammo each weapon's clip can hold
-#define WEAPON_NOCLIP               -1
+#define WEAPON_NOCLIP			-1
 
-#define LOUD_GUN_VOLUME             1000
-#define NORMAL_GUN_VOLUME           600
-#define QUIET_GUN_VOLUME            200
+#define LOUD_GUN_VOLUME			1000
+#define NORMAL_GUN_VOLUME		600
+#define QUIET_GUN_VOLUME		200
 
-#define BRIGHT_GUN_FLASH            512
-#define NORMAL_GUN_FLASH            256
-#define DIM_GUN_FLASH               128
+#define BRIGHT_GUN_FLASH		512
+#define NORMAL_GUN_FLASH		256
+#define DIM_GUN_FLASH			128
 
-#define BIG_EXPLOSION_VOLUME        2048
-#define NORMAL_EXPLOSION_VOLUME     1024
-#define SMALL_EXPLOSION_VOLUME      512
+#define BIG_EXPLOSION_VOLUME		2048
+#define NORMAL_EXPLOSION_VOLUME		1024
+#define SMALL_EXPLOSION_VOLUME		512
 
-#define WEAPON_ACTIVITY_VOLUME      64
+#define WEAPON_ACTIVITY_VOLUME		64
 
 // spawn flags
-#define SF_DETONATE                 BIT(0) // Grenades flagged with this will be triggered when the owner calls detonateSatchelCharges
+#define SF_DETONATE			0x0001	// Grenades flagged with this will be triggered when the owner calls detonateSatchelCharges
 
 // custom enum
 enum ArmorType
 {
-	ARMOR_NONE,     // no armor
-	ARMOR_KEVLAR,   // body vest only
-	ARMOR_VESTHELM, // vest and helmet
+	ARMOR_NONE,	// no armor
+	ARMOR_KEVLAR,	// body vest only
+	ARMOR_VESTHELM,	// vest and helmet
 };
 
 enum ArmouryItemPack
@@ -92,17 +91,17 @@ enum ArmouryItemPack
 	ARMOURY_KEVLAR,
 	ARMOURY_ASSAULT,
 	ARMOURY_SMOKEGRENADE,
-	ARMOURY_SHIELD,
-	ARMOURY_FAMAS,
-	ARMOURY_SG550,
-	ARMOURY_GALIL,
-	ARMOURY_UMP45,
 	ARMOURY_GLOCK18,
 	ARMOURY_USP,
 	ARMOURY_ELITE,
 	ARMOURY_FIVESEVEN,
 	ARMOURY_P228,
 	ARMOURY_DEAGLE,
+	ARMOURY_FAMAS,
+	ARMOURY_SG550,
+	ARMOURY_GALIL,
+	ARMOURY_UMP45,
+	ARMOURY_SHIELD
 };
 
 struct ItemInfo
@@ -136,7 +135,9 @@ struct MULTIDAMAGE
 #include "weapontype.h"
 #include "items.h"
 
-class CArmoury: public CBaseEntity {
+class CArmoury: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CArmoury, CBaseEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -150,7 +151,9 @@ public:
 };
 
 // Smoke Grenade / HE grenade / Flashbang grenade / C4
-class CGrenade: public CBaseMonster {
+class CGrenade: public CBaseMonster
+{
+	DECLARE_CLASS_TYPES(CGrenade, CBaseMonster);
 public:
 	virtual void Spawn() = 0;
 	virtual int Save(CSave &save) = 0;
@@ -163,7 +166,7 @@ public:
 public:
 	bool m_bStartDefuse;
 	bool m_bIsC4;
-	EntityHandle<CBasePlayer> m_pBombDefuser;
+	EHANDLE m_pBombDefuser;
 	float m_flDefuseCountDown;
 	float m_flC4Blow;
 	float m_flNextFreqInterval;
@@ -188,24 +191,27 @@ public:
 };
 
 // Items that the player has in their inventory that they can use
-class CBasePlayerItem: public CBaseAnimating {
+class CCSPlayerItem;
+class CBasePlayerItem: public CBaseAnimating
+{
+	DECLARE_CLASS_TYPES(CBasePlayerItem, CBaseAnimating);
 public:
 	virtual int Save(CSave &save) = 0;
 	virtual int Restore(CRestore &restore) = 0;
 	virtual void SetObjectCollisionBox() = 0;
 	virtual CBaseEntity *Respawn() = 0;
-	virtual int AddToPlayer(CBasePlayer *pPlayer) = 0;			// return TRUE if the item you want the item added to the player inventory
+	virtual int AddToPlayer(CBasePlayer *pPlayer) = 0;		// return TRUE if the item you want the item added to the player inventory
 	virtual int AddDuplicate(CBasePlayerItem *pItem) = 0;		// return TRUE if you want your duplicate removed from world
-	virtual int GetItemInfo(ItemInfo *p) = 0;					// returns 0 if struct not filled out
+	virtual int GetItemInfo(ItemInfo *p) = 0;			// returns 0 if struct not filled out
 	virtual BOOL CanDeploy() = 0;
-	virtual BOOL CanDrop() = 0;									// returns is deploy was successful
+	virtual BOOL CanDrop() = 0;					// returns is deploy was successful
 	virtual BOOL Deploy() = 0;
 	virtual BOOL IsWeapon() = 0;
-	virtual BOOL CanHolster() = 0;								// can this weapon be put away right now?
+	virtual BOOL CanHolster() = 0;					// can this weapon be put away right now?
 	virtual void Holster(int skiplocal = 0) = 0;
 	virtual void UpdateItemInfo() = 0;
-	virtual void ItemPreFrame() = 0;							// called each frame by the player PreThink
-	virtual void ItemPostFrame() = 0;							// called each frame by the player PostThink
+	virtual void ItemPreFrame() = 0;				// called each frame by the player PreThink
+	virtual void ItemPostFrame() = 0;				// called each frame by the player PostThink
 	virtual void Drop() = 0;
 	virtual void Kill() = 0;
 	virtual void AttachToPlayer(CBasePlayer *pPlayer) = 0;
@@ -214,7 +220,13 @@ public:
 	virtual int UpdateClientData(CBasePlayer *pPlayer) = 0;
 	virtual CBasePlayerItem *GetWeaponPtr() = 0;
 	virtual float GetMaxSpeed() = 0;
-	virtual int iItemSlot() = 0;								// return 0 to MAX_ITEMS_SLOTS, used in hud
+	virtual int iItemSlot() = 0;					// return 0 to MAX_ITEMS_SLOTS, used in hud
+
+	CCSPlayerItem *CSPlayerItem() const
+	{
+		return reinterpret_cast<CCSPlayerItem *>(this->m_pEntity);
+	}
+
 public:
 	CBasePlayer *m_pPlayer;
 	CBasePlayerItem *m_pNext;
@@ -222,7 +234,10 @@ public:
 };
 
 // inventory items that
-class CBasePlayerWeapon: public CBasePlayerItem {
+class CCSPlayerWeapon;
+class CBasePlayerWeapon: public CBasePlayerItem
+{
+	DECLARE_CLASS_TYPES(CBasePlayerWeapon, CBasePlayerItem);
 public:
 	virtual int Save(CSave &save) = 0;
 	virtual int Restore(CRestore &restore) = 0;
@@ -253,21 +268,27 @@ public:
 	virtual void RetireWeapon() = 0;
 	virtual BOOL ShouldWeaponIdle() = 0;
 	virtual BOOL UseDecrement() = 0;
+
+	CCSPlayerWeapon *CSPlayerWeapon() const
+	{
+		return reinterpret_cast<CCSPlayerWeapon *>(this->m_pEntity);
+	}
+
 public:
 	BOOL IsPistol() { return (m_iId == WEAPON_USP || m_iId == WEAPON_GLOCK18 || m_iId == WEAPON_P228 || m_iId == WEAPON_DEAGLE || m_iId == WEAPON_ELITE || m_iId == WEAPON_FIVESEVEN); }
 
 	int m_iPlayEmptySound;
 	int m_fFireOnEmpty;
-	float m_flNextPrimaryAttack;	// soonest time ItemPostFrame will call PrimaryAttack
-	float m_flNextSecondaryAttack;	// soonest time ItemPostFrame will call SecondaryAttack
-	float m_flTimeWeaponIdle;		// soonest time ItemPostFrame will call WeaponIdle
-	int m_iPrimaryAmmoType;			// "primary" ammo index into players m_rgAmmo[]
-	int m_iSecondaryAmmoType;		// "secondary" ammo index into players m_rgAmmo[]
+	float m_flNextPrimaryAttack;			// soonest time ItemPostFrame will call PrimaryAttack
+	float m_flNextSecondaryAttack;			// soonest time ItemPostFrame will call SecondaryAttack
+	float m_flTimeWeaponIdle;			// soonest time ItemPostFrame will call WeaponIdle
+	int m_iPrimaryAmmoType;				// "primary" ammo index into players m_rgAmmo[]
+	int m_iSecondaryAmmoType;			// "secondary" ammo index into players m_rgAmmo[]
 	int m_iClip;					// number of shots left in the primary weapon clip, -1 it not used
 	int m_iClientClip;				// the last version of m_iClip sent to hud dll
-	int m_iClientWeaponState;		// the last version of the weapon state sent to hud dll (is current weapon, is on target)
+	int m_iClientWeaponState;			// the last version of the weapon state sent to hud dll (is current weapon, is on target)
 	int m_fInReload;				// Are we in the middle of a reload;
-	int m_fInSpecialReload;			// Are we in the middle of a reload for the shotguns
+	int m_fInSpecialReload;				// Are we in the middle of a reload for the shotguns
 	int m_iDefaultAmmo;				// how much ammo you get when you pick up this weapon as placed by a level designer.
 	int m_iShellId;
 	float m_fMaxSpeed;
@@ -279,8 +300,8 @@ public:
 	int m_iShotsFired;
 	Vector m_vVecAiming;
 	string_t model_name;
-	float m_flGlock18Shoot;			// time to shoot the remaining bullets of the glock18 burst fire
-	int m_iGlock18ShotsFired;		// used to keep track of the shots fired during the Glock18 burst fire mode.
+	float m_flGlock18Shoot;				// time to shoot the remaining bullets of the glock18 burst fire
+	int m_iGlock18ShotsFired;			// used to keep track of the shots fired during the Glock18 burst fire mode.
 	float m_flFamasShoot;
 	int m_iFamasShotsFired;
 	float m_fBurstSpread;
@@ -295,14 +316,18 @@ public:
 	float m_flLastFireTime;
 };
 
-class CBasePlayerAmmo: public CBaseEntity {
+class CBasePlayerAmmo: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CBasePlayerAmmo, CBaseEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual BOOL AddAmmo(CBaseEntity *pOther) = 0;
 	virtual CBaseEntity *Respawn() = 0;
 };
 
-class CWeaponBox: public CBaseEntity {
+class CWeaponBox: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CWeaponBox, CBaseEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -319,47 +344,9 @@ public:
 	bool m_bIsBomb;
 };
 
-
-const float USP_MAX_SPEED     = 250.0f;
-const float USP_DAMAGE        = 34.0f;
-const float USP_DAMAGE_SIL    = 30.0f;
-const float USP_RANGE_MODIFER = 0.79f;
-const float USP_RELOAD_TIME   = 2.7f;
-
-enum usp_e
+class CUSP: public CBasePlayerWeapon
 {
-	USP_IDLE,
-	USP_SHOOT1,
-	USP_SHOOT2,
-	USP_SHOOT3,
-	USP_SHOOT_EMPTY,
-	USP_RELOAD,
-	USP_DRAW,
-	USP_ATTACH_SILENCER,
-	USP_UNSIL_IDLE,
-	USP_UNSIL_SHOOT1,
-	USP_UNSIL_SHOOT2,
-	USP_UNSIL_SHOOT3,
-	USP_UNSIL_SHOOT_EMPTY,
-	USP_UNSIL_RELOAD,
-	USP_UNSIL_DRAW,
-	USP_DETACH_SILENCER,
-};
-
-enum usp_shield_e
-{
-	USP_SHIELD_IDLE,
-	USP_SHIELD_SHOOT1,
-	USP_SHIELD_SHOOT2,
-	USP_SHIELD_SHOOT_EMPTY,
-	USP_SHIELD_RELOAD,
-	USP_SHIELD_DRAW,
-	USP_SHIELD_UP_IDLE,
-	USP_SHIELD_UP,
-	USP_SHIELD_DOWN,
-};
-
-class CUSP: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CUSP, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -373,31 +360,15 @@ public:
 	virtual void WeaponIdle() = 0;
 	virtual BOOL UseDecrement() = 0;
 	virtual BOOL IsPistol() = 0;
-
 public:
 	int m_iShell;
-	unsigned short GetEventID() const { return m_usFireUSP; }
-private:
-	unsigned short m_usFireUSP;
+	unsigned short m_usFire;
+	float m_flBaseDamageSil;
 };
 
-
-const float MP5N_MAX_SPEED     = 250.0f;
-const float MP5N_DAMAGE        = 26.0f;
-const float MP5N_RANGE_MODIFER = 0.84f;
-const float MP5N_RELOAD_TIME   = 2.63f;
-
-enum mp5n_e
+class CMP5N: public CBasePlayerWeapon
 {
-	MP5N_IDLE1,
-	MP5N_RELOAD,
-	MP5N_DRAW,
-	MP5N_SHOOT1,
-	MP5N_SHOOT2,
-	MP5N_SHOOT3,
-};
-
-class CMP5N: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CMP5N, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -411,30 +382,13 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	int iShellOn;
-	unsigned short GetEventID() const { return m_usFireMP5N; }
-private:
-	unsigned short m_usFireMP5N;
+	int m_iShellOn;
+	unsigned short m_usFire;
 };
 
-
-const float SG552_MAX_SPEED      = 235.0f;
-const float SG552_MAX_SPEED_ZOOM = 200.0f;
-const float SG552_DAMAGE         = 33.0f;
-const float SG552_RANGE_MODIFER  = 0.955f;
-const float SG552_RELOAD_TIME    = 3.0f;
-
-enum sg552_e
+class CSG552: public CBasePlayerWeapon
 {
-	SG552_IDLE1,
-	SG552_RELOAD,
-	SG552_DRAW,
-	SG552_SHOOT1,
-	SG552_SHOOT2,
-	SG552_SHOOT3,
-};
-
-class CSG552: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CSG552, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -449,29 +403,13 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	int iShellOn;
-	unsigned short GetEventID() const { return m_usFireSG552; }
-private:
-	unsigned short m_usFireSG552;
+	int m_iShellOn;
+	unsigned short m_usFire;
 };
 
-
-const float AK47_MAX_SPEED     = 221.0f;
-const float AK47_DAMAGE        = 36.0f;
-const float AK47_RANGE_MODIFER = 0.98f;
-const float AK47_RELOAD_TIME   = 2.45f;
-
-enum ak47_e
+class CAK47: public CBasePlayerWeapon
 {
-	AK47_IDLE1,
-	AK47_RELOAD,
-	AK47_DRAW,
-	AK47_SHOOT1,
-	AK47_SHOOT2,
-	AK47_SHOOT3,
-};
-
-class CAK47: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CAK47, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -486,29 +424,13 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	int iShellOn;
-	unsigned short GetEventID() const { return m_usFireAK47; }
-private:
-	unsigned short m_usFireAK47;
+	int m_iShellOn;
+	unsigned short m_usFire;
 };
 
-
-const float AUG_MAX_SPEED     = 240.0f;
-const float AUG_DAMAGE        = 32.0f;
-const float AUG_RANGE_MODIFER = 0.96f;
-const float AUG_RELOAD_TIME   = 3.3f;
-
-enum aug_e
+class CAUG: public CBasePlayerWeapon
 {
-	AUG_IDLE1,
-	AUG_RELOAD,
-	AUG_DRAW,
-	AUG_SHOOT1,
-	AUG_SHOOT2,
-	AUG_SHOOT3,
-};
-
-class CAUG: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CAUG, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -523,30 +445,13 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	int iShellOn;
-	unsigned short GetEventID() const { return m_usFireAug; }
-private:
-	unsigned short m_usFireAug;
+	int m_iShellOn;
+	unsigned short m_usFire;
 };
 
-
-const float AWP_MAX_SPEED      = 210.0f;
-const float AWP_MAX_SPEED_ZOOM = 150.0f;
-const float AWP_DAMAGE         = 115.0f;
-const float AWP_RANGE_MODIFER  = 0.99f;
-const float AWP_RELOAD_TIME    = 2.5f;
-
-enum awp_e
+class CAWP: public CBasePlayerWeapon
 {
-	AWP_IDLE,
-	AWP_SHOOT,
-	AWP_SHOOT2,
-	AWP_SHOOT3,
-	AWP_RELOAD,
-	AWP_DRAW,
-};
-
-class CAWP: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CAWP, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -561,29 +466,16 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	unsigned short GetEventID() const { return m_usFireAWP; }
-private:
-	unsigned short m_usFireAWP;
+	unsigned short m_usFire;
 };
-
 
 // for usermsg BombDrop
 #define BOMB_FLAG_DROPPED	0 // if the bomb was dropped due to voluntary dropping or death/disconnect
 #define BOMB_FLAG_PLANTED	1 // if the bomb has been planted will also trigger the round timer to hide will also show where the dropped bomb on the Terrorist team's radar.
 
-const float C4_MAX_AMMO       = 1.0f;
-const float C4_MAX_SPEED      = 250.0f;
-const float C4_ARMING_ON_TIME = 3.0f;
-
-enum c4_e
+class CC4: public CBasePlayerWeapon
 {
-	C4_IDLE1,
-	C4_DRAW,
-	C4_DROP,
-	C4_ARM,
-};
-
-class CC4: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CC4, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -601,28 +493,12 @@ public:
 	bool m_bStartedArming;
 	bool m_bBombPlacedAnimation;
 	float m_fArmedTime;
-	bool HasShield() const { return m_bHasShield; }
-private:
 	bool m_bHasShield;
 };
 
-
-const float DEAGLE_MAX_SPEED     = 250.0f;
-const float DEAGLE_DAMAGE        = 54.0f;
-const float DEAGLE_RANGE_MODIFER = 0.81f;
-const float DEAGLE_RELOAD_TIME   = 2.2f;
-
-enum deagle_e
+class CDEAGLE: public CBasePlayerWeapon
 {
-	DEAGLE_IDLE1,
-	DEAGLE_SHOOT1,
-	DEAGLE_SHOOT2,
-	DEAGLE_SHOOT_EMPTY,
-	DEAGLE_RELOAD,
-	DEAGLE_DRAW,
-};
-
-class CDEAGLE: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CDEAGLE, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -638,24 +514,12 @@ public:
 	virtual BOOL IsPistol() = 0;
 public:
 	int m_iShell;
-	unsigned short GetEventID() const { return m_usFireDeagle; }
-private:
-	unsigned short m_usFireDeagle;
+	unsigned short m_usFire;
 };
 
-
-const float FLASHBANG_MAX_SPEED        = 250.0f;
-const float FLASHBANG_MAX_SPEED_SHIELD = 180.0f;
-
-enum flashbang_e
+class CFlashbang: public CBasePlayerWeapon
 {
-	FLASHBANG_IDLE,
-	FLASHBANG_PULLPIN,
-	FLASHBANG_THROW,
-	FLASHBANG_DRAW,
-};
-
-class CFlashbang: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CFlashbang, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -673,23 +537,9 @@ public:
 	virtual BOOL IsPistol() = 0;
 };
 
-
-const float G3SG1_MAX_SPEED      = 210.0f;
-const float G3SG1_MAX_SPEED_ZOOM = 150.0f;
-const float G3SG1_DAMAGE         = 80.0f;
-const float G3SG1_RANGE_MODIFER  = 0.98f;
-const float G3SG1_RELOAD_TIME    = 3.5f;
-
-enum g3sg1_e
+class CG3SG1: public CBasePlayerWeapon
 {
-	G3SG1_IDLE,
-	G3SG1_SHOOT,
-	G3SG1_SHOOT2,
-	G3SG1_RELOAD,
-	G3SG1_DRAW,
-};
-
-class CG3SG1: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CG3SG1, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -704,48 +554,12 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	unsigned short GetEventID() const { return m_usFireG3SG1; }
-private:
-	unsigned short m_usFireG3SG1;
+	unsigned short m_usFire;
 };
 
-
-const float GLOCK18_MAX_SPEED     = 250.0f;
-const float GLOCK18_DAMAGE        = 25.0f;
-const float GLOCK18_RANGE_MODIFER = 0.75f;
-const float GLOCK18_RELOAD_TIME   = 2.2f;
-
-enum glock18_e
+class CGLOCK18: public CBasePlayerWeapon
 {
-	GLOCK18_IDLE1,
-	GLOCK18_IDLE2,
-	GLOCK18_IDLE3,
-	GLOCK18_SHOOT,
-	GLOCK18_SHOOT2,
-	GLOCK18_SHOOT3,
-	GLOCK18_SHOOT_EMPTY,
-	GLOCK18_RELOAD,
-	GLOCK18_DRAW,
-	GLOCK18_HOLSTER,
-	GLOCK18_ADD_SILENCER,
-	GLOCK18_DRAW2,
-	GLOCK18_RELOAD2,
-};
-
-enum glock18_shield_e
-{
-	GLOCK18_SHIELD_IDLE1,
-	GLOCK18_SHIELD_SHOOT,
-	GLOCK18_SHIELD_SHOOT2,
-	GLOCK18_SHIELD_SHOOT_EMPTY,
-	GLOCK18_SHIELD_RELOAD,
-	GLOCK18_SHIELD_DRAW,
-	GLOCK18_SHIELD_IDLE,
-	GLOCK18_SHIELD_UP,
-	GLOCK18_SHIELD_DOWN,
-};
-
-class CGLOCK18: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CGLOCK18, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -764,19 +578,9 @@ public:
 	bool m_bBurstFire;
 };
 
-
-const float HEGRENADE_MAX_SPEED        = 250.0f;
-const float HEGRENADE_MAX_SPEED_SHIELD = 180.0f;
-
-enum hegrenade_e
+class CHEGrenade: public CBasePlayerWeapon
 {
-	HEGRENADE_IDLE,
-	HEGRENADE_PULLPIN,
-	HEGRENADE_THROW,
-	HEGRENADE_DRAW,
-};
-
-class CHEGrenade: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CHEGrenade, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -792,39 +596,12 @@ public:
 	virtual void WeaponIdle() = 0;
 	virtual BOOL UseDecrement() = 0;
 public:
-	unsigned short m_usCreateExplosion;
+	unsigned short m_usCreate;
 };
 
-
-const float KNIFE_BODYHIT_VOLUME   = 128.0f;
-const float KNIFE_WALLHIT_VOLUME   = 512.0f;
-const float KNIFE_MAX_SPEED        = 250.0f;
-const float KNIFE_MAX_SPEED_SHIELD = 180.0f;
-
-enum knife_e
+class CKnife: public CBasePlayerWeapon
 {
-	KNIFE_IDLE,
-	KNIFE_ATTACK1HIT,
-	KNIFE_ATTACK2HIT,
-	KNIFE_DRAW,
-	KNIFE_STABHIT,
-	KNIFE_STABMISS,
-	KNIFE_MIDATTACK1HIT,
-	KNIFE_MIDATTACK2HIT,
-};
-
-enum knife_shield_e
-{
-	KNIFE_SHIELD_IDLE,
-	KNIFE_SHIELD_SLASH,
-	KNIFE_SHIELD_ATTACKHIT,
-	KNIFE_SHIELD_DRAW,
-	KNIFE_SHIELD_UPIDLE,
-	KNIFE_SHIELD_UP,
-	KNIFE_SHIELD_DOWN,
-};
-
-class CKnife: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CKnife, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -841,24 +618,17 @@ public:
 public:
 	TraceResult m_trHit;
 	unsigned short m_usKnife;
+	float m_flStabBaseDamage;
+	float m_flSwingBaseDamage;
+	float m_flSwingBaseDamage_Fast;
+	float m_flStabDistance;
+	float m_flSwingDistance;
+	float m_flBackStabMultiplier;
 };
 
-
-const float M249_MAX_SPEED     = 220.0f;
-const float M249_DAMAGE        = 32.0f;
-const float M249_RANGE_MODIFER = 0.97f;
-const float M249_RELOAD_TIME   = 4.7f;
-
-enum m249_e
+class CM249: public CBasePlayerWeapon
 {
-	M249_IDLE1,
-	M249_SHOOT1,
-	M249_SHOOT2,
-	M249_RELOAD,
-	M249_DRAW,
-};
-
-class CM249: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CM249, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -872,29 +642,13 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	int iShellOn;
-	unsigned short GetEventID() const { return m_usFireM249; }
-private:
-	unsigned short m_usFireM249;
+	int m_iShellOn;
+	unsigned short m_usFire;
 };
 
-
-const float M3_MAX_SPEED   = 230.0f;
-const Vector M3_CONE_VECTOR = Vector(0.0675, 0.0675, 0.0); // special shotgun spreads
-
-enum m3_e
+class CM3: public CBasePlayerWeapon
 {
-	M3_IDLE,
-	M3_FIRE1,
-	M3_FIRE2,
-	M3_RELOAD,
-	M3_PUMP,
-	M3_START_RELOAD,
-	M3_DRAW,
-	M3_HOLSTER,
-};
-
-class CM3: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CM3, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -909,38 +663,12 @@ public:
 public:
 	int m_iShell;
 	float m_flPumpTime;
-	unsigned short GetEventID() const { return m_usFireM3; }
-private:
-	unsigned short m_usFireM3;
+	unsigned short m_usFire;
 };
 
-
-const float M4A1_MAX_SPEED         = 230.0f;
-const float M4A1_DAMAGE            = 32.0f;
-const float M4A1_DAMAGE_SIL        = 33.0f;
-const float M4A1_RANGE_MODIFER     = 0.97f;
-const float M4A1_RANGE_MODIFER_SIL = 0.95f;
-const float M4A1_RELOAD_TIME       = 3.05f;
-
-enum m4a1_e
+class CM4A1: public CBasePlayerWeapon
 {
-	M4A1_IDLE,
-	M4A1_SHOOT1,
-	M4A1_SHOOT2,
-	M4A1_SHOOT3,
-	M4A1_RELOAD,
-	M4A1_DRAW,
-	M4A1_ATTACH_SILENCER,
-	M4A1_UNSIL_IDLE,
-	M4A1_UNSIL_SHOOT1,
-	M4A1_UNSIL_SHOOT2,
-	M4A1_UNSIL_SHOOT3,
-	M4A1_UNSIL_RELOAD,
-	M4A1_UNSIL_DRAW,
-	M4A1_DETACH_SILENCER,
-};
-
-class CM4A1: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CM4A1, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -955,29 +683,14 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	int iShellOn;
-	unsigned short GetEventID() const { return m_usFireM4A1; }
-private:
-	unsigned short m_usFireM4A1;
+	int m_iShellOn;
+	unsigned short m_usFire;
+	float m_flBaseDamageSil;
 };
 
-
-const float MAC10_MAX_SPEED     = 250.0f;
-const float MAC10_DAMAGE        = 29.0f;
-const float MAC10_RANGE_MODIFER = 0.82f;
-const float MAC10_RELOAD_TIME   = 3.15f;
-
-enum mac10_e
+class CMAC10: public CBasePlayerWeapon
 {
-	MAC10_IDLE1,
-	MAC10_RELOAD,
-	MAC10_DRAW,
-	MAC10_SHOOT1,
-	MAC10_SHOOT2,
-	MAC10_SHOOT3,
-};
-
-class CMAC10: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CMAC10, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -991,43 +704,13 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	int iShellOn;
-	unsigned short GetEventID() const { return m_usFireMAC10; }
-private:
-	unsigned short m_usFireMAC10;
+	int m_iShellOn;
+	unsigned short m_usFire;
 };
 
-
-const float P228_MAX_SPEED     = 250.0f;
-const float P228_DAMAGE        = 32.0f;
-const float P228_RANGE_MODIFER = 0.8f;
-const float P228_RELOAD_TIME   = 2.7f;
-
-enum p228_e
+class CP228: public CBasePlayerWeapon
 {
-	P228_IDLE,
-	P228_SHOOT1,
-	P228_SHOOT2,
-	P228_SHOOT3,
-	P228_SHOOT_EMPTY,
-	P228_RELOAD,
-	P228_DRAW,
-};
-
-enum p228_shield_e
-{
-	P228_SHIELD_IDLE,
-	P228_SHIELD_SHOOT1,
-	P228_SHIELD_SHOOT2,
-	P228_SHIELD_SHOOT_EMPTY,
-	P228_SHIELD_RELOAD,
-	P228_SHIELD_DRAW,
-	P228_SHIELD_IDLE_UP,
-	P228_SHIELD_UP,
-	P228_SHIELD_DOWN,
-};
-
-class CP228: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CP228, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -1043,28 +726,12 @@ public:
 	virtual BOOL IsPistol() = 0;
 public:
 	int m_iShell;
-	unsigned short GetEventID() const { return m_usFireP228; }
-private:
-	unsigned short m_usFireP228;
+	unsigned short m_usFire;
 };
 
-
-const float P90_MAX_SPEED     = 245.0f;
-const float P90_DAMAGE        = 21.0f;
-const float P90_RANGE_MODIFER = 0.885f;
-const float P90_RELOAD_TIME   = 3.4f;
-
-enum p90_e
+class CP90: public CBasePlayerWeapon
 {
-	P90_IDLE1,
-	P90_RELOAD,
-	P90_DRAW,
-	P90_SHOOT1,
-	P90_SHOOT2,
-	P90_SHOOT3,
-};
-
-class CP90: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CP90, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -1078,29 +745,13 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	int iShellOn;
-	unsigned short GetEventID() const { return m_usFireP90; }
-private:
-	unsigned short m_usFireP90;
+	int m_iShellOn;
+	unsigned short m_usFire;
 };
 
-
-const float SCOUT_MAX_SPEED      = 260.0f;
-const float SCOUT_MAX_SPEED_ZOOM = 220.0f;
-const float SCOUT_DAMAGE         = 75.0f;
-const float SCOUT_RANGE_MODIFER  = 0.98f;
-const float SCOUT_RELOAD_TIME    = 2.0f;
-
-enum scout_e
+class CSCOUT: public CBasePlayerWeapon
 {
-	SCOUT_IDLE,
-	SCOUT_SHOOT,
-	SCOUT_SHOOT2,
-	SCOUT_RELOAD,
-	SCOUT_DRAW,
-};
-
-class CSCOUT: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CSCOUT, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -1115,24 +766,12 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	unsigned short GetEventID() const { return m_usFireScout; }
-private:
-	unsigned short m_usFireScout;
+	unsigned short m_usFire;
 };
 
-
-const float SMOKEGRENADE_MAX_SPEED        = 250.0f;
-const float SMOKEGRENADE_MAX_SPEED_SHIELD = 180.0f;
-
-enum smokegrenade_e
+class CSmokeGrenade: public CBasePlayerWeapon
 {
-	SMOKEGRENADE_IDLE,
-	SMOKEGRENADE_PINPULL,
-	SMOKEGRENADE_THROW,
-	SMOKEGRENADE_DRAW,
-};
-
-class CSmokeGrenade: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CSmokeGrenade, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -1148,26 +787,12 @@ public:
 	virtual void WeaponIdle() = 0;
 	virtual BOOL UseDecrement() = 0;
 public:
-	unsigned short m_usCreateSmoke;
+	unsigned short m_usCreate;
 };
 
-
-const float TMP_MAX_SPEED     = 250.0f;
-const float TMP_DAMAGE        = 20.0f;
-const float TMP_RANGE_MODIFER = 0.85f;
-const float TMP_RELOAD_TIME   = 2.12f;
-
-enum tmp_e
+class CTMP: public CBasePlayerWeapon
 {
-	TMP_IDLE1,
-	TMP_RELOAD,
-	TMP_DRAW,
-	TMP_SHOOT1,
-	TMP_SHOOT2,
-	TMP_SHOOT3,
-};
-
-class CTMP: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CTMP, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -1181,28 +806,13 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	int iShellOn;
-	unsigned short GetEventID() const { return m_usFireTMP; }
-private:
-	unsigned short m_usFireTMP;
+	int m_iShellOn;
+	unsigned short m_usFire;
 };
 
-
-const float XM1014_MAX_SPEED   = 240.0f;
-const Vector XM1014_CONE_VECTOR = Vector(0.0725, 0.0725, 0.0); // special shotgun spreads
-
-enum xm1014_e
+class CXM1014: public CBasePlayerWeapon
 {
-	XM1014_IDLE,
-	XM1014_FIRE1,
-	XM1014_FIRE2,
-	XM1014_RELOAD,
-	XM1014_PUMP,
-	XM1014_START_RELOAD,
-	XM1014_DRAW,
-};
-
-class CXM1014: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CXM1014, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -1217,38 +827,12 @@ public:
 public:
 	int m_iShell;
 	float m_flPumpTime;
-	unsigned short GetEventID() const { return m_usFireXM1014; }
-private:
-	unsigned short m_usFireXM1014;
+	unsigned short m_usFire;
 };
 
-
-const float ELITE_MAX_SPEED     = 250.0f;
-const float ELITE_RELOAD_TIME   = 4.5f;
-const float ELITE_DAMAGE        = 36.0f;
-const float ELITE_RANGE_MODIFER = 0.75f;
-
-enum elite_e
+class CELITE: public CBasePlayerWeapon
 {
-	ELITE_IDLE,
-	ELITE_IDLE_LEFTEMPTY,
-	ELITE_SHOOTLEFT1,
-	ELITE_SHOOTLEFT2,
-	ELITE_SHOOTLEFT3,
-	ELITE_SHOOTLEFT4,
-	ELITE_SHOOTLEFT5,
-	ELITE_SHOOTLEFTLAST,
-	ELITE_SHOOTRIGHT1,
-	ELITE_SHOOTRIGHT2,
-	ELITE_SHOOTRIGHT3,
-	ELITE_SHOOTRIGHT4,
-	ELITE_SHOOTRIGHT5,
-	ELITE_SHOOTRIGHTLAST,
-	ELITE_RELOAD,
-	ELITE_DRAW,
-};
-
-class CELITE: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CELITE, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -1263,30 +847,13 @@ public:
 	virtual BOOL IsPistol() = 0;
 public:
 	int m_iShell;
-	unsigned short GetEventID_Left() const { return m_usFireELITE_LEFT; }
-	unsigned short GetEventID_Right() const { return m_usFireELITE_RIGHT; }
-private:
-	unsigned short m_usFireELITE_LEFT;
-	unsigned short m_usFireELITE_RIGHT;
+	unsigned short m_usFire_LEFT;
+	unsigned short m_usFire_RIGHT;
 };
 
-
-const float FIVESEVEN_MAX_SPEED     = 250.0f;
-const float FIVESEVEN_DAMAGE        = 20.0f;
-const float FIVESEVEN_RANGE_MODIFER = 0.885f;
-const float FIVESEVEN_RELOAD_TIME   = 2.7f;
-
-enum fiveseven_e
+class CFiveSeven: public CBasePlayerWeapon
 {
-	FIVESEVEN_IDLE,
-	FIVESEVEN_SHOOT1,
-	FIVESEVEN_SHOOT2,
-	FIVESEVEN_SHOOT_EMPTY,
-	FIVESEVEN_RELOAD,
-	FIVESEVEN_DRAW,
-};
-
-class CFiveSeven: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CFiveSeven, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -1302,28 +869,12 @@ public:
 	virtual BOOL IsPistol() = 0;
 public:
 	int m_iShell;
-	unsigned short GetEventID() const { return m_usFireFiveSeven; }
-private:
-	unsigned short m_usFireFiveSeven;
+	unsigned short m_usFire;
 };
 
-
-const float UMP45_MAX_SPEED     = 250.0f;
-const float UMP45_DAMAGE        = 30.0f;
-const float UMP45_RANGE_MODIFER = 0.82f;
-const float UMP45_RELOAD_TIME   = 3.5f;
-
-enum ump45_e
+class CUMP45: public CBasePlayerWeapon
 {
-	UMP45_IDLE1,
-	UMP45_RELOAD,
-	UMP45_DRAW,
-	UMP45_SHOOT1,
-	UMP45_SHOOT2,
-	UMP45_SHOOT3,
-};
-
-class CUMP45: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CUMP45, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -1337,29 +888,13 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	int iShellOn;
-	unsigned short GetEventID() const { return m_usFireUMP45; }
-private:
-	unsigned short m_usFireUMP45;
+	int m_iShellOn;
+	unsigned short m_usFire;
 };
 
-
-const float SG550_MAX_SPEED      = 210.0f;
-const float SG550_MAX_SPEED_ZOOM = 150.0f;
-const float SG550_DAMAGE         = 70.0f;
-const float SG550_RANGE_MODIFER  = 0.98f;
-const float SG550_RELOAD_TIME    = 3.35f;
-
-enum sg550_e
+class CSG550: public CBasePlayerWeapon
 {
-	SG550_IDLE,
-	SG550_SHOOT,
-	SG550_SHOOT2,
-	SG550_RELOAD,
-	SG550_DRAW,
-};
-
-class CSG550: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CSG550, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -1374,28 +909,12 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	unsigned short GetEventID() const { return m_usFireSG550; }
-private:
-	unsigned short m_usFireSG550;
+	unsigned short m_usFire;
 };
 
-
-const float GALIL_MAX_SPEED     = 240.0f;
-const float GALIL_DAMAGE        = 30.0f;
-const float GALIL_RANGE_MODIFER = 0.98f;
-const float GALIL_RELOAD_TIME   = 2.45f;
-
-enum galil_e
+class CGalil: public CBasePlayerWeapon
 {
-	GALIL_IDLE1,
-	GALIL_RELOAD,
-	GALIL_DRAW,
-	GALIL_SHOOT1,
-	GALIL_SHOOT2,
-	GALIL_SHOOT3,
-};
-
-class CGalil: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CGalil, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -1410,30 +929,13 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	int iShellOn;
-	unsigned short GetEventID() const { return m_usFireGalil; }
-private:
-	unsigned short m_usFireGalil;
+	int m_iShellOn;
+	unsigned short m_usFire;
 };
 
-
-const float FAMAS_MAX_SPEED     = 240.0f;
-const float FAMAS_RELOAD_TIME   = 3.3f;
-const float FAMAS_DAMAGE        = 30.0f;
-const float FAMAS_DAMAGE_BURST  = 34.0f;
-const float FAMAS_RANGE_MODIFER = 0.96f;
-
-enum famas_e
+class CFamas: public CBasePlayerWeapon
 {
-	FAMAS_IDLE1,
-	FAMAS_RELOAD,
-	FAMAS_DRAW,
-	FAMAS_SHOOT1,
-	FAMAS_SHOOT2,
-	FAMAS_SHOOT3,
-};
-
-class CFamas: public CBasePlayerWeapon {
+	DECLARE_CLASS_TYPES(CFamas, CBasePlayerWeapon);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -1448,5 +950,6 @@ public:
 	virtual BOOL UseDecrement() = 0;
 public:
 	int m_iShell;
-	int iShellOn;
+	int m_iShellOn;
+	float m_flBaseDamageBurst;
 };

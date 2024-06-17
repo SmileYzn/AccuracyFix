@@ -39,7 +39,7 @@
 #include "strtools.h"
 
 #ifdef _WIN32
-	#define WIN32_LEAN_AND_MEAN
+	#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 	#define NOWINRES
 	#define NOSERVICE
 	#define NOMCX
@@ -62,21 +62,24 @@
 // Header file containing definition of globalvars_t and entvars_t
 typedef int EOFFSET;					// More explicit than "int"
 typedef unsigned int func_t;
-typedef unsigned int string_t;			// from engine's pr_comp.h;
 typedef float vec_t;					// needed before including progdefs.h
 
 // Vector class
 #include "vector.h"
-//#include "vector.h"
+
 // Defining it as a (bogus) struct helps enforce type-checking
 #define vec3_t Vector
-// Shared engine/DLL constants
 
+// QString class
+#include "qstring.h"
+
+// Shared engine/DLL constants
 #include "const.h"
 #include "edict.h"
 
 // Shared header describing protocol between engine and DLLs
 #include "eiface.h"
+
 // Shared header between the client DLL and the game DLLs
 #include "cdll_dll.h"
 #include "extdef.h"

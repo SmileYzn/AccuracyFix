@@ -25,33 +25,36 @@
 *   version.
 *
 */
-
 #pragma once
 
-const int MAX_SENTENCE_NAME      = 16;
-const int MAX_SENTENCE_VOXFILE   = 1536;	// max number of sentences in game. NOTE: this must match CVOXFILESENTENCEMAX in engine\sound.h
+#define CSENTENCEG_MAX		200			// max number of sentence groups
+#define CSENTENCE_LRU_MAX	32			// max number of elements per sentence group
+#define CDPVPRESETMAX		27
 
-const int MAX_SENTENCE_GROUPS    = 200;		// max number of sentence groups
-const int MAX_SENTENCE_LRU       = 32;		// max number of elements per sentence group
-const int MAX_SENTENCE_DPV_RESET = 27;		// max number of dynamic pitch volumes
+// spawnflags
+#define AMBIENT_SOUND_STATIC			0	// medium radius attenuation
+#define AMBIENT_SOUND_EVERYWHERE		1
+#define AMBIENT_SOUND_SMALLRADIUS		2
+#define AMBIENT_SOUND_MEDIUMRADIUS		4
+#define AMBIENT_SOUND_LARGERADIUS		8
+#define AMBIENT_SOUND_START_SILENT		16
+#define AMBIENT_SOUND_NOT_LOOPING		32
 
-const float MAX_ANNOUNCE_MINS    = 2.25f;
-const float MIN_ANNOUNCE_MINS    = 0.25f;
+#define ANNOUNCE_MINUTES_MIN			0.25
+#define ANNOUNCE_MINUTES_MAX			2.25
 
-enum LowFreqOsc : int
-{
-	LFO_OFF = 0,
-	LFO_SQUARE,		// square
-	LFO_TRIANGLE,	// triangle
-	LFO_RANDOM,		// random
-};
+#define SPEAKER_START_SILENT			1	// wait for trigger 'on' to start announcements
+
+#define LFO_SQUARE				1	// square
+#define LFO_TRIANGLE				2	// triangle
+#define LFO_RANDOM				3	// random
 
 // group of related sentences
 struct sentenceg
 {
 	char szgroupname[16];
 	int count;
-	unsigned char rgblru[MAX_SENTENCE_LRU];
+	unsigned char rgblru[ CSENTENCE_LRU_MAX ];
 };
 
 // runtime pitch shift and volume fadein/out structure
@@ -66,16 +69,16 @@ typedef struct dynpitchvol
 
 	int pitchrun;		// pitch shift % when sound is running 0 - 255
 	int pitchstart;		// pitch shift % when sound stops or starts 0 - 255
-	int spinup;			// spinup time 0 - 100
+	int spinup;		// spinup time 0 - 100
 	int spindown;		// spindown time 0 - 100
 
-	int volrun;			// volume change % when sound is running 0 - 10
+	int volrun;		// volume change % when sound is running 0 - 10
 	int volstart;		// volume change % when sound stops or starts 0 - 10
-	int fadein;			// volume fade in time 0 - 100
+	int fadein;		// volume fade in time 0 - 100
 	int fadeout;		// volume fade out time 0 - 100
 
 	// Low Frequency Oscillator
-	LowFreqOsc lfotype;	// 0) off 1) square 2) triangle 3) random
+	int lfotype;		// 0) off 1) square 2) triangle 3) random
 	int lforate;		// 0 - 1000, how fast lfo osciallates
 
 	int lfomodpitch;	// 0-100 mod of current pitch. 0 is off.
@@ -97,15 +100,9 @@ typedef struct dynpitchvol
 
 } dynpitchvol_t;
 
-#define SF_AMBIENT_SOUND_STATIC         0 // medium radius attenuation
-#define SF_AMBIENT_SOUND_EVERYWHERE     0x0001
-#define SF_AMBIENT_SOUND_SMALLRADIUS    0x0002
-#define SF_AMBIENT_SOUND_MEDIUMRADIUS   0x0004
-#define SF_AMBIENT_SOUND_LARGERADIUS    0x0008
-#define SF_AMBIENT_SOUND_START_SILENT   0x0016
-#define SF_AMBIENT_SOUND_NOT_LOOPING    0x0032
-
-class CAmbientGeneric: public CBaseEntity {
+class CAmbientGeneric: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CAmbientGeneric, CBaseEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -117,11 +114,13 @@ public:
 public:
 	float m_flAttenuation;	// attenuation value
 	dynpitchvol_t m_dpv;
-	BOOL m_fActive;			// only TRUE when the entity is playing a looping sound
-	BOOL m_fLooping;		// TRUE when the sound played will loop
+	BOOL m_fActive;		// only TRUE when the entity is playing a looping sound
+	BOOL m_fLooping;	// TRUE when the sound played will loop
 };
 
-class CEnvSound: public CPointEntity {
+class CEnvSound: public CPointEntity
+{
+	DECLARE_CLASS_TYPES(CEnvSound, CPointEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -133,9 +132,9 @@ public:
 	float m_flRoomtype;
 };
 
-#define SF_SPEAKER_START_SILENT	0x0001 // wait for trigger 'on' to start announcements
-
-class CSpeaker: public CBaseEntity {
+class CSpeaker: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CSpeaker, CBaseEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;

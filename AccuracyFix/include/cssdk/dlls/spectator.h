@@ -25,7 +25,6 @@
 *   version.
 *
 */
-
 #pragma once
 
 class CBaseSpectator: public CBaseEntity {

@@ -60,15 +60,20 @@ const int DEFAULT_FOV      = 90;	// the default field of view
 #define ITEM_STATUS_NIGHTVISION BIT(0)
 #define ITEM_STATUS_DEFUSER     BIT(1)
 
-#define SCORE_STATUS_DEAD BIT(0)
-#define SCORE_STATUS_BOMB BIT(1)
-#define SCORE_STATUS_VIP  BIT(2)
+#define SCORE_STATUS_NONE   0
+#define SCORE_STATUS_DEAD   BIT(0)
+#define SCORE_STATUS_BOMB   BIT(1)
+#define SCORE_STATUS_VIP    BIT(2)
+#define SCORE_STATUS_DEFKIT BIT(3)
 
 // player data iuser3
 #define PLAYER_CAN_SHOOT        BIT(0)
 #define PLAYER_FREEZE_TIME_OVER BIT(1)
 #define PLAYER_IN_BOMB_ZONE     BIT(2)
 #define PLAYER_HOLDING_SHIELD   BIT(3)
+#define PLAYER_PREVENT_DUCK     BIT(4)
+#define PLAYER_PREVENT_CLIMB    BIT(5) // The player can't climb ladder
+#define PLAYER_PREVENT_JUMP     BIT(6)
 
 #define MENU_KEY_1 BIT(0)
 #define MENU_KEY_2 BIT(1)
@@ -80,11 +85,6 @@ const int DEFAULT_FOV      = 90;	// the default field of view
 #define MENU_KEY_8 BIT(7)
 #define MENU_KEY_9 BIT(8)
 #define MENU_KEY_0 BIT(9)
-
-#define HUD_PRINTNOTIFY  1
-#define HUD_PRINTCONSOLE 2
-#define HUD_PRINTTALK    3
-#define HUD_PRINTCENTER  4
 
 #define WEAPON_SUIT       31
 #define WEAPON_ALLWEAPONS (~(1<<WEAPON_SUIT))

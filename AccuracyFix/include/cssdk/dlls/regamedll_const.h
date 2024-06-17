@@ -30,16 +30,16 @@
 
 // These are caps bits to indicate what an object's capabilities (currently used for save/restore and level transitions)
 #define FCAP_CUSTOMSAVE         0x00000001
-#define FCAP_ACROSS_TRANSITION  0x00000002 // should transfer between transitions
+#define FCAP_ACROSS_TRANSITION  0x00000002 // Should transfer between transitions
 #define FCAP_MUST_SPAWN         0x00000004 // Spawn after restore
 #define FCAP_DONT_SAVE          0x80000000 // Don't save this
-#define FCAP_IMPULSE_USE        0x00000008 // can be used by the player
-#define FCAP_CONTINUOUS_USE     0x00000010 // can be used by the player
-#define FCAP_ONOFF_USE          0x00000020 // can be used by the player
+#define FCAP_IMPULSE_USE        0x00000008 // Can be used by the player
+#define FCAP_CONTINUOUS_USE     0x00000010 // Can be used by the player
+#define FCAP_ONOFF_USE          0x00000020 // Can be used by the player
 #define FCAP_DIRECTIONAL_USE    0x00000040 // Player sends +/- 1 when using (currently only tracktrains)
 #define FCAP_MASTER             0x00000080 // Can be used to "master" other entities (like multisource)
-#define FCAP_MUST_RESET         0x00000100 // should reset on the new round
-#define FCAP_MUST_RELEASE       0x00000200 // should release on the new round
+#define FCAP_MUST_RESET         0x00000100 // Should reset on the new round
+#define FCAP_MUST_RELEASE       0x00000200 // Should release on the new round
 
 // UNDONE: This will ignore transition volumes (trigger_transition), but not the PVS!!!
 #define FCAP_FORCE_TRANSITION   0x00000080 // ALWAYS goes across transitions
@@ -94,15 +94,15 @@
 #define DMG_MORTAR              (1<<23) // Hit by air raid (done to distinguish grenade from mortar)
 #define DMG_EXPLOSION           (1<<24)
 
-// these are the damage types that are allowed to gib corpses
+// These are the damage types that are allowed to gib corpses
 #define DMG_GIB_CORPSE         (DMG_CRUSH | DMG_FALL | DMG_BLAST | DMG_SONIC | DMG_CLUB)
 
-// these are the damage types that have client hud art
+// These are the damage types that have client hud art
 #define DMG_SHOWNHUD           (DMG_POISON | DMG_ACID | DMG_FREEZE | DMG_SLOWFREEZE | DMG_DROWN | DMG_BURN | DMG_SLOWBURN | DMG_NERVEGAS | DMG_RADIATION | DMG_SHOCK)
 
-// when calling KILLED(), a value that governs gib behavior is expected to be
+// When calling KILLED(), a value that governs gib behavior is expected to be
 // one of these three values
-#define GIB_NORMAL             0 // gib if entity was overkilled
-#define GIB_NEVER              1 // never gib, no matter how much death damage is done ( freezing, etc )
-#define GIB_ALWAYS             2 // always gib ( Houndeye Shock, Barnacle Bite )
+#define GIB_NORMAL             0 // Gib if entity was overkilled
+#define GIB_NEVER              1 // Never gib, no matter how much death damage is done ( freezing, etc )
+#define GIB_ALWAYS             2 // Always gib ( Houndeye Shock, Barnacle Bite )
 #define GIB_HEALTH_VALUE      -30

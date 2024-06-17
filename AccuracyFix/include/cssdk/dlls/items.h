@@ -25,19 +25,18 @@
 *   version.
 *
 */
-
 #pragma once
 
 enum ItemRestType
 {
-	ITEM_TYPE_BUYING,  // when a player buying items
-	ITEM_TYPE_TOUCHED, // when the player touches with a weaponbox or armoury_entity
-	ITEM_TYPE_EQUIPPED // when an entity game_player_equip gives item to player or default item's on player spawn
+	ITEM_TYPE_BUYING,	// when a player buying items
+	ITEM_TYPE_TOUCHED,	// when the player touches with a weaponbox or armoury_entity
+	ITEM_TYPE_EQUIPPED	// when an entity game_player_equip gives item to player or default item's on player spawn
 };
 
 // constant items
-#define ITEM_ID_ANTIDOTE 2
-#define ITEM_ID_SECURITY 3
+#define ITEM_ID_ANTIDOTE	2
+#define ITEM_ID_SECURITY	3
 
 enum ItemID
 {
@@ -84,14 +83,18 @@ enum ItemID
 	ITEM_BATTERY
 };
 
-class CItem: public CBaseEntity {
+class CItem: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CItem, CBaseEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual CBaseEntity *Respawn() = 0;
 	virtual BOOL MyTouch(CBasePlayer *pPlayer) = 0;
 };
 
-class CWorldItem: public CBaseEntity {
+class CWorldItem: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CWorldItem, CBaseEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -99,56 +102,72 @@ public:
 	int m_iType;
 };
 
-class CItemSuit: public CItem {
+class CItemSuit: public CItem
+{
+	DECLARE_CLASS_TYPES(CItemSuit, CItem);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
 	virtual BOOL MyTouch(CBasePlayer *pPlayer) = 0;
 };
 
-class CItemBattery: public CItem {
+class CItemBattery: public CItem
+{
+	DECLARE_CLASS_TYPES(CItemBattery, CItem);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
 	virtual BOOL MyTouch(CBasePlayer *pPlayer) = 0;
 };
 
-class CItemAntidote: public CItem {
+class CItemAntidote: public CItem
+{
+	DECLARE_CLASS_TYPES(CItemAntidote, CItem);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
 	virtual BOOL MyTouch(CBasePlayer *pPlayer) = 0;
 };
 
-class CItemSecurity: public CItem {
+class CItemSecurity: public CItem
+{
+	DECLARE_CLASS_TYPES(CItemSecurity, CItem);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
 	virtual BOOL MyTouch(CBasePlayer *pPlayer) = 0;
 };
 
-class CItemLongJump: public CItem {
+class CItemLongJump: public CItem
+{
+	DECLARE_CLASS_TYPES(CItemLongJump, CItem);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
 	virtual BOOL MyTouch(CBasePlayer *pPlayer) = 0;
 };
 
-class CItemKevlar: public CItem {
+class CItemKevlar: public CItem
+{
+	DECLARE_CLASS_TYPES(CItemKevlar, CItem);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
 	virtual BOOL MyTouch(CBasePlayer *pPlayer) = 0;
 };
 
-class CItemAssaultSuit: public CItem {
+class CItemAssaultSuit: public CItem
+{
+	DECLARE_CLASS_TYPES(CItemAssaultSuit, CItem);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
 	virtual BOOL MyTouch(CBasePlayer *pPlayer) = 0;
 };
 
-class CItemThighPack: public CItem {
+class CItemThighPack: public CItem
+{
+	DECLARE_CLASS_TYPES(CItemThighPack, CItem);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;

@@ -25,7 +25,6 @@
 *   version.
 *
 */
-
 #pragma once
 
 class CHostageImprov;
@@ -140,10 +139,10 @@ public:
 	virtual const char *GetName() const { return "Follow"; }
 	virtual void UpdateStationaryAnimation(CHostageImprov *improv) {}
 public:
-	void SetLeader(CBasePlayer *leader) { m_leader = leader; }
-	CBasePlayer *GetLeader() const { return m_leader; }
+	void SetLeader(CBaseEntity *leader) { m_leader = leader; }
+	CBaseEntity *GetLeader() const { return m_leader; }
 private:
-	mutable EntityHandle<CBasePlayer> m_leader;
+	mutable EHANDLE m_leader;
 	Vector m_lastLeaderPos;
 	bool m_isWaiting;
 	float m_stopRange;

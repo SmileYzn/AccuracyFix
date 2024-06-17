@@ -25,14 +25,47 @@
 *   version.
 *
 */
-
 #pragma once
 
-#define SF_SPRITE_STARTON   BIT(0)
-#define SF_SPRITE_ONCE      BIT(1)
-#define SF_SPRITE_TEMPORARY BIT(15)
+#define SF_BEAM_STARTON			0x0001
+#define SF_BEAM_TOGGLE			0x0002
+#define SF_BEAM_RANDOM			0x0004
+#define SF_BEAM_RING			0x0008
+#define SF_BEAM_SPARKSTART		0x0010
+#define SF_BEAM_SPARKEND		0x0020
+#define SF_BEAM_DECALS			0x0040
+#define SF_BEAM_SHADEIN			0x0080
+#define SF_BEAM_SHADEOUT		0x0100
+#define SF_BEAM_TEMPORARY		0x8000
 
-class CSprite: public CPointEntity {
+#define SF_GIBSHOOTER_REPEATABLE	1
+#define SF_FUNNEL_REVERSE		1
+
+#define SF_BUBBLES_STARTOFF		0x0001
+
+#define SF_BLOOD_RANDOM			0x0001
+#define SF_BLOOD_STREAM			0x0002
+#define SF_BLOOD_PLAYER			0x0004
+#define SF_BLOOD_DECAL			0x0008
+
+#define SF_SHAKE_EVERYONE		0x0001
+#define SF_SHAKE_DISRUPT		0x0002
+#define SF_SHAKE_INAIR			0x0004
+
+#define SF_FADE_IN			0x0001
+#define SF_FADE_MODULATE		0x0002
+#define SF_FADE_ONLYONE			0x0004
+
+#define SF_SPRITE_STARTON		0x0001
+#define SF_SPRITE_ONCE			0x0002
+#define SF_SPRITE_TEMPORARY		0x8000
+
+#define SF_MESSAGE_ONCE			0x0001	// Fade in, not out
+#define SF_MESSAGE_ALL			0x0002	// Send to all clients
+
+class CSprite: public CPointEntity
+{
+	DECLARE_CLASS_TYPES(CSprite, CPointEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -45,7 +78,7 @@ public:
 public:
 	void SetAttachment(edict_t *pEntity, int attachment)
 	{
-		if (pEntity)
+		if (pEntity != NULL)
 		{
 			pev->skin = ENTINDEX(pEntity);
 			pev->body = attachment;
@@ -81,18 +114,9 @@ private:
 	float m_maxFrame;
 };
 
-#define SF_BEAM_STARTON    BIT(0)
-#define SF_BEAM_TOGGLE     BIT(1)
-#define SF_BEAM_RANDOM     BIT(2)
-#define SF_BEAM_RING       BIT(3)
-#define SF_BEAM_SPARKSTART BIT(4)
-#define SF_BEAM_SPARKEND   BIT(5)
-#define SF_BEAM_DECALS     BIT(6)
-#define SF_BEAM_SHADEIN    BIT(7)
-#define SF_BEAM_SHADEOUT   BIT(8)
-#define SF_BEAM_TEMPORARY  BIT(15)
-
-class CBeam: public CBaseEntity {
+class CBeam: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CBeam, CBaseEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -144,7 +168,9 @@ public:
 	}
 };
 
-class CLaser: public CBeam {
+class CLaser: public CBeam
+{
+	DECLARE_CLASS_TYPES(CLaser, CBeam);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -158,9 +184,9 @@ public:
 	Vector m_firePosition;
 };
 
-#define SF_BUBBLES_STARTOFF BIT(0)
-
-class CBubbling: public CBaseEntity {
+class CBubbling: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CBubbling, CBaseEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -176,7 +202,9 @@ public:
 	int m_state;
 };
 
-class CLightning: public CBeam {
+class CLightning: public CBeam
+{
+	DECLARE_CLASS_TYPES(CLightning, CBeam);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -208,7 +236,9 @@ public:
 	float m_radius;
 };
 
-class CGlow: public CPointEntity {
+class CGlow: public CPointEntity
+{
+	DECLARE_CLASS_TYPES(CGlow, CPointEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual int Save(CSave &save) = 0;
@@ -219,7 +249,9 @@ public:
 	float m_maxFrame;
 };
 
-class CBombGlow: public CSprite {
+class CBombGlow: public CSprite
+{
+	DECLARE_CLASS_TYPES(CBombGlow, CSprite);
 public:
 	virtual void Spawn() = 0;
 	virtual void Think() = 0;
@@ -229,9 +261,9 @@ public:
 	bool m_bSetModel;
 };
 
-#define SF_GIBSHOOTER_REPEATABLE BIT(0) // Allows a gibshooter to be refired
-
-class CGibShooter: public CBaseDelay {
+class CGibShooter: public CBaseDelay
+{
+	DECLARE_CLASS_TYPES(CGibShooter, CBaseDelay);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -251,16 +283,20 @@ public:
 	float m_flGibLife;
 };
 
-class CEnvShooter: public CGibShooter {
+class CEnvShooter: public CGibShooter
+{
+	DECLARE_CLASS_TYPES(CEnvShooter, CGibShooter);
 public:
 	virtual void Precache() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
 	virtual CGib *CreateGib() = 0;
 };
 
-const int MAX_BEAM = 24;
+#define MAX_BEAM 24
 
-class CTestEffect: public CBaseDelay {
+class CTestEffect: public CBaseDelay
+{
+	DECLARE_CLASS_TYPES(CTestEffect, CBaseDelay);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -275,12 +311,9 @@ public:
 	float m_flStartTime;
 };
 
-#define SF_BLOOD_RANDOM BIT(0)
-#define SF_BLOOD_STREAM BIT(1)
-#define SF_BLOOD_PLAYER BIT(2)
-#define SF_BLOOD_DECAL  BIT(3)
-
-class CBlood: public CPointEntity {
+class CBlood: public CPointEntity
+{
+	DECLARE_CLASS_TYPES(CBlood, CPointEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -294,11 +327,9 @@ public:
 	void SetBloodAmount(float amount) { pev->dmg = amount; }
 };
 
-#define SF_SHAKE_EVERYONE BIT(0) // Don't check radius
-#define SF_SHAKE_DISRUPT  BIT(1) // Disrupt controls
-#define SF_SHAKE_INAIR    BIT(2) // Shake players in air
-
-class CShake: public CPointEntity {
+class CShake: public CPointEntity
+{
+	DECLARE_CLASS_TYPES(CShake, CPointEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -315,11 +346,9 @@ public:
 	void SetRadius(float radius) { pev->dmg = radius; }
 };
 
-#define SF_FADE_IN       BIT(0) // Fade in, not out
-#define SF_FADE_MODULATE BIT(1) // Modulate, don't blend
-#define SF_FADE_ONLYONE  BIT(2)
-
-class CFade: public CPointEntity {
+class CFade: public CPointEntity
+{
+	DECLARE_CLASS_TYPES(CFade, CPointEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
@@ -332,10 +361,9 @@ public:
 	void SetHoldTime(float hold) { pev->dmg_save = hold; }
 };
 
-#define SF_MESSAGE_ONCE BIT(0) // Fade in, not out
-#define SF_MESSAGE_ALL  BIT(1) // Send to all clients
-
-class CMessage: public CPointEntity {
+class CMessage: public CPointEntity
+{
+	DECLARE_CLASS_TYPES(CMessage, CPointEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -343,9 +371,9 @@ public:
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) = 0;
 };
 
-#define SF_FUNNEL_REVERSE BIT(0) // Funnel effect repels particles instead of attracting them
-
-class CEnvFunnel: public CBaseDelay {
+class CEnvFunnel: public CBaseDelay
+{
+	DECLARE_CLASS_TYPES(CEnvFunnel, CBaseDelay);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -354,14 +382,18 @@ public:
 	int m_iSprite;
 };
 
-class CEnvBeverage: public CBaseDelay {
+class CEnvBeverage: public CBaseDelay
+{
+	DECLARE_CLASS_TYPES(CEnvBeverage, CBaseDelay);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) = 0;
 };
 
-class CItemSoda: public CBaseEntity {
+class CItemSoda: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CItemSoda, CBaseEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void Precache() = 0;
@@ -400,7 +432,7 @@ inline const Vector &CBeam::GetEndPos()
 	}
 
 	edict_t *pent = INDEXENT(GetEndEntity());
-	if (pent)
+	if (pent != NULL)
 	{
 		return pent->v.origin;
 	}

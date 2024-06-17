@@ -25,10 +25,18 @@
 *   version.
 *
 */
-
 #pragma once
 
-class CShower: public CBaseEntity {
+#define SF_ENVEXPLOSION_NODAMAGE	(1<<0)	// when set, ENV_EXPLOSION will not actually inflict damage
+#define SF_ENVEXPLOSION_REPEATABLE	(1<<1)	// can this entity be refired?
+#define SF_ENVEXPLOSION_NOFIREBALL	(1<<2)	// don't draw the fireball
+#define SF_ENVEXPLOSION_NOSMOKE		(1<<3)	// don't draw the smoke
+#define SF_ENVEXPLOSION_NODECAL		(1<<4)	// don't make a scorch mark
+#define SF_ENVEXPLOSION_NOSPARKS	(1<<5)	// don't make a scorch mark
+
+class CShower: public CBaseEntity
+{
+	DECLARE_CLASS_TYPES(CShower, CBaseEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual int ObjectCaps() = 0;
@@ -36,14 +44,9 @@ public:
 	virtual void Touch(CBaseEntity *pOther) = 0;
 };
 
-#define SF_ENVEXPLOSION_NODAMAGE   BIT(0) // when set, ENV_EXPLOSION will not actually inflict damage
-#define SF_ENVEXPLOSION_REPEATABLE BIT(1) // can this entity be refired?
-#define SF_ENVEXPLOSION_NOFIREBALL BIT(2) // don't draw the fireball
-#define SF_ENVEXPLOSION_NOSMOKE    BIT(3) // don't draw the smoke
-#define SF_ENVEXPLOSION_NODECAL    BIT(4) // don't make a scorch mark
-#define SF_ENVEXPLOSION_NOSPARKS   BIT(5) // don't make a scorch mark
-
-class CEnvExplosion: public CBaseMonster {
+class CEnvExplosion: public CBaseMonster
+{
+	DECLARE_CLASS_TYPES(CEnvExplosion, CBaseMonster);
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;

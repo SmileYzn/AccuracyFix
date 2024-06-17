@@ -25,14 +25,11 @@
 *   version.
 *
 */
-
 #pragma once
 
-#define SF_CORNER_WAITFORTRIG BIT(0)
-#define SF_CORNER_TELEPORT    BIT(1)
-#define SF_CORNER_FIREONCE    BIT(2)
-
-class CPathCorner: public CPointEntity {
+class CPathCorner: public CPointEntity
+{
+	DECLARE_CLASS_TYPES(CPathCorner, CPointEntity);
 public:
 	virtual void Spawn() = 0;
 	virtual void KeyValue(KeyValueData *pkvd) = 0;
