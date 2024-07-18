@@ -1,31 +1,33 @@
 #include <amxmodx>
 #include <fakemeta>
 
+// Max Weapons
 #define MAX_WEAPONS 32
 
-enum _:WeaponInfo
-{
-	Index,
-	Name[MAX_NAME_LENGTH],
-	Slot
-};
+// Weapon Slots by index
+new const g_iWeaponSlot[] = {0, 2, 0, 1, 4, 1, 5, 1, 1, 4, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 4, 2, 1, 1, 3, 1};
 
-new g_hRegUserMsg;
+// Player Weapon Index
+new g_iPlayerWeaponId[MAX_PLAYERS+1] = {0, ...};
 
-new g_eServerWeaponInfo[MAX_WEAPONS+1][WeaponInfo];
-new g_ePlayerWeaponInfo[MAX_PLAYERS+1][WeaponInfo];
-
-new g_iAccuracyAim[MAX_WEAPONS+1] = {8192, ...};
+// Weapon accuracy value
+new g_iAccuracyWeapon[MAX_WEAPONS+1] = {8192, ...};
 
 public plugin_init()
 {
-	register_plugin("Accuracy Fix", "0.0.5", "SmileY", "https://github.com/smileyzn/accuracyfix", "Accuracy Fix (AMXX Plugin)");
+	register_plugin("Accuracy Fix", "0.0.6", "SmileY", "https://github.com/smileyzn/accuracyfix", "Accuracy Fix (AMXX Plugin)");
 
-	for (new i = 0; i < MAX_WEAPONS;i++)
+	new szWeapon[MAX_NAME_LENGTH];
+	
+	for (new iWeaponId = 0; iWeaponId < MAX_WEAPONS; iWeaponId++)
 	{
-		if (g_eServerWeaponInfo[i][Index])
+		if (1 <= g_iWeaponSlot[iWeaponId] <= 2)
 		{
-			bind_pcvar_num(create_cvar(fmt("af_distance_%s", g_eServerWeaponInfo[i][Name]),"8192", FCVAR_NONE, "", true, 0.0, true, 8192.0), g_iAccuracyAim[i]);
+			get_weaponname(iWeaponId, szWeapon, charsmax(szWeapon));
+			
+			format(szWeapon, charsmax(szWeapon), "af_distance_%s", szWeapon);
+			
+			bind_pcvar_num(create_cvar(szWeapon, "8192", FCVAR_NONE, "", true, 0.0, true, 8192.0), g_iAccuracyWeapon[iWeaponId]);
 		}
 	}
 	
@@ -34,50 +36,9 @@ public plugin_init()
 	register_forward(FM_TraceLine, "FW_FM_TraceLine", true);
 }
 
-public plugin_precache()
-{
-	g_hRegUserMsg = register_forward(FM_RegUserMsg,"FW_FM_RegUserMsg", true);
-}
-
-public FW_FM_RegUserMsg(szMsg[], iSize)
-{
-	if (equali(szMsg, "WeaponList"))
-	{
-		register_message(get_orig_retval(), "MSG_WeaponList");
-		
-		unregister_forward(FM_RegUserMsg, g_hRegUserMsg, true);
-	}
-}
-
-public MSG_WeaponList(iMsgId, iMsgDest, iMsgEntity)
-{
-	new iWeaponId = get_msg_arg_int(8);
-	
-	if (iWeaponId)
-	{
-		new iSlot = get_msg_arg_int(6);
-		
-		if (0 <= iSlot <= 1)
-		{
-			g_eServerWeaponInfo[iWeaponId][Index] = iWeaponId;
-			
-			g_eServerWeaponInfo[iWeaponId][Slot] = iSlot;
-			
-			get_msg_arg_string(1, g_eServerWeaponInfo[iWeaponId][Name], 32);			
-		}
-	}
-	
-	return PLUGIN_CONTINUE;
-}
-
 public EV_CurWeapon(id)
 {
-	new iWeaponId = get_user_weapon(id);
-	
-	if (iWeaponId)
-	{
-		g_ePlayerWeaponInfo[id] = g_eServerWeaponInfo[iWeaponId];
-	}
+	g_iPlayerWeaponId[id] = get_user_weapon(id);
 	
 	return PLUGIN_CONTINUE;
 }
@@ -90,14 +51,14 @@ public FW_FM_TraceLine(Float:vStart[3], Float:vEnd[3], iSkipMonsters, iEntity, i
 		{
 			if (pev(iEntity, pev_flags) & FL_CLIENT|FL_ONGROUND|FL_FAKECLIENT)
 			{
-				if (0 <= g_ePlayerWeaponInfo[iEntity][Slot] <= 1)
+				if (1 <= g_iWeaponSlot[g_iPlayerWeaponId[iEntity]] <= 2)
 				{
-					if (g_iAccuracyAim[g_ePlayerWeaponInfo[iEntity][Index]] > 0)
+					if (g_iAccuracyWeapon[g_iPlayerWeaponId[iEntity]] > 0)
 					{
 						new iTarget, iBody;
-
-						new Float:Distance = get_user_aiming(iEntity, iTarget, iBody, g_iAccuracyAim[g_ePlayerWeaponInfo[iEntity][Index]]);
-
+						
+						new Float:Distance = get_user_aiming(iEntity, iTarget, iBody, g_iAccuracyWeapon[g_iPlayerWeaponId[iEntity]]);
+						
 						if (iTarget > 0 && iTarget <= MaxClients)
 						{
 							if (pev_valid(iTarget))
