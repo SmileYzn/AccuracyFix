@@ -9,7 +9,7 @@ plugin_info_t Plugin_info =
 	"SmileY",
 	"https://pugbr.net",
 	"AF",
-	PT_ANYTIME,
+	PT_STARTUP,
 	PT_ANYTIME,
 };
 
