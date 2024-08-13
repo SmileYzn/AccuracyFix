@@ -1,4 +1,4 @@
-name: Linux Build CI
+name: Build C/C++
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-
+  linux:
+    name: Linux Build
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +28,7 @@ jobs:
         mkdir temp
         cd temp
 
-        # AMD 64
+        # amd64
         wget http://mirrors.kernel.org/ubuntu/pool/universe/g/gcc-4.8/g++-4.8_4.8.5-4ubuntu8_amd64.deb
         wget http://mirrors.kernel.org/ubuntu/pool/universe/g/gcc-4.8/libstdc++-4.8-dev_4.8.5-4ubuntu8_amd64.deb
         wget http://mirrors.kernel.org/ubuntu/pool/universe/g/gcc-4.8/gcc-4.8-base_4.8.5-4ubuntu8_amd64.deb
@@ -50,10 +50,10 @@ jobs:
         
     - name: Update GCC and G++ alternatives
       run: |
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50 
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50 
-        sudo update-alternatives --config gcc 
-        sudo update-alternatives --config g++ 
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
+        sudo update-alternatives --config gcc
+        sudo update-alternatives --config g++
 
     - name: Run build
       working-directory: ./AccuracyFix
@@ -73,5 +73,48 @@ jobs:
     - name: Deploy artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: accuracyfix-linux
+        name: linux32
         path: publish/*
+        
+  windows:
+    name: Windows Build
+    runs-on: windows-latest
+      
+    env:
+      SOLUTION_FILE_PATH: .
+      BUILD_CONFIGURATION: Release
+  
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Run Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Move release file to publish
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: |
+        # Make publish directory
+        mkdir publish\addons\accuracyfix\dlls
+
+        # Move released dll to publish
+        move ${{env.BUILD_CONFIGURATION}}\*.dll publish\addons\accuracyfix\dlls
+
+        # Move settings file to folder
+        mv ${{env.SOLUTION_FILE_PATH}}\cstrike\addons\accuracyfix\accuracyfix.cfg publish\addons\accuracyfix\accuracyfix.cfg
+
+    - name: Deploy artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: win32
+        path: publish/*
+        
+        
+        
