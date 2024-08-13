@@ -8,12 +8,6 @@ void CAccuracyFix::ServerActivate()
 
 	this->m_af_distance_all = gAccuracyUtil.CvarRegister("af_distance_all", "-1.0");
 
-#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
-	this->m_Data.clear();
-
-	this->m_af_recoil_all = gAccuracyUtil.CvarRegister("af_recoil_all", "-1.0");
-#endif
-
 	char cvarName[64] = { 0 };
 
 	for (int WeaponID = WEAPON_P228; WeaponID <= WEAPON_P90; WeaponID++)
@@ -35,12 +29,6 @@ void CAccuracyFix::ServerActivate()
 						Q_snprintf(cvarName, sizeof(cvarName), "af_accuracy_%s", SlotInfo->weaponName);
 
 						this->m_af_accuracy[WeaponID] = gAccuracyUtil.CvarRegister(cvarName, "9999.0");
-
-#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
-						Q_snprintf(cvarName, sizeof(cvarName), "af_recoil_%s", SlotInfo->weaponName);
-
-						this->m_af_recoil[WeaponID] = gAccuracyUtil.CvarRegister(cvarName, "1.0");
-#endif
 					}
 				}
 			}
@@ -57,21 +45,6 @@ void CAccuracyFix::ServerActivate()
 		}
 	}
 }
-
-#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
-void CAccuracyFix::CmdEnd(const edict_t* pEdict)
-{
-	auto Player = UTIL_PlayerByIndexSafe(ENTINDEX(pEdict));
-
-	if (Player)
-	{
-		if (Player->IsAlive())
-		{
-			this->m_Data[Player->entindex()].LastFired = Player->m_flLastFired;
-		}
-	}
-}
-#endif
 
 void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
@@ -93,14 +66,6 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 						{
 							if ((Player->m_pActiveItem->iItemSlot() == PRIMARY_WEAPON_SLOT) || (Player->m_pActiveItem->iItemSlot() == PISTOL_SLOT))
 							{
-#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
-								if ((Player->edict()->v.button & IN_ATTACK) && (Player->m_flLastFired != this->m_Data[EntityIndex].LastFired))
-								{
-									this->m_Data[EntityIndex].LastFired = Player->m_flLastFired;
-
-									this->m_Data[EntityIndex].WeaponId = Player->m_pActiveItem->m_iId;
-								}
-#endif
 								auto DistanceLimit = this->m_af_distance[Player->m_pActiveItem->m_iId]->value;
 
 								if (this->m_af_distance_all->value > 0)
@@ -145,33 +110,3 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 	}
 }
 
-#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
-void CAccuracyFix::PostThink(CBasePlayer* Player)
-{
-	if (Player->IsAlive())
-	{
-		auto EntityIndex = Player->entindex();
-
-		if (this->m_Data[EntityIndex].WeaponId != WEAPON_NONE)
-		{
-			auto Recoil = this->m_af_recoil[this->m_Data[EntityIndex].WeaponId]->value;
-
-			if (Recoil > 0.0f)
-			{
-				if (this->m_af_recoil_all->value > 0.0f)
-				{
-					Recoil = this->m_af_recoil_all->value;
-				}
-
-				auto PunchAngle = Player->edict()->v.punchangle;
-
-				PunchAngle = PunchAngle * Recoil;
-
-				Player->edict()->v.punchangle = PunchAngle;
-			}
-
-			this->m_Data[EntityIndex].WeaponId = WEAPON_NONE;
-		}
-	}
-}
-#endif

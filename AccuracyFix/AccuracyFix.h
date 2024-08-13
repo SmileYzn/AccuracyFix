@@ -1,13 +1,5 @@
 #pragma once
 
-#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
-typedef struct S_PLAYER_DATA
-{
-	float LastFired;
-	int	  WeaponId;
-} P_PLAYER_DATA, *LP_PLAYER_DATA;
-#endif
-
 class CAccuracyFix
 {
 public:
@@ -23,13 +15,6 @@ private:
 
 	cvar_t* m_af_accuracy_all;
 	std::array<cvar_t*, MAX_WEAPONS + 1> m_af_accuracy;
-
-#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
-	std::map<int, P_PLAYER_DATA> m_Data;
-
-	cvar_t* m_af_recoil_all;
-	std::array<cvar_t*, MAX_WEAPONS + 1> m_af_recoil;
-#endif
 };
 
 extern CAccuracyFix gAccuracyFix;

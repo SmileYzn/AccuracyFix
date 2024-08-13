@@ -9,6 +9,4 @@ extern bool ReGameDLL_Init();
 extern bool ReGameDLL_Stop();
 
 CGameRules *ReGameDLL_InstallGameRules(IReGameHook_InstallGameRules* chain);
-#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
-void ReGameDLL_CBasePlayer_PostThink(IReGameHook_CBasePlayer_PostThink* chain, CBasePlayer* pthis);
-#endif
+

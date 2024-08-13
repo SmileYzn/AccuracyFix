@@ -1,4 +1,4 @@
-#include "precompiled.h"
+1#include "precompiled.h"
 
 // DLL PRE Functions Table
 DLL_FUNCTIONS gDLL_FunctionTable_Pre;
@@ -26,11 +26,6 @@ C_DLLEXPORT int GetEntityAPI2_Post(DLL_FUNCTIONS* pFunctionTable, int* interface
 
 	// Register Functions Here //
 	gDLL_FunctionTable_Post.pfnServerActivate = DLL_POST_ServerActivate;
-
-#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
-	gDLL_FunctionTable_Post.pfnCmdEnd = DLL_POST_CmdEnd;
-#endif
-
 	memcpy(pFunctionTable, &gDLL_FunctionTable_Post, sizeof(DLL_FUNCTIONS));
 
 	return 1;
@@ -42,13 +37,4 @@ void DLL_POST_ServerActivate(edict_t* pEdictList, int edictCount, int clientMax)
 
 	RETURN_META(MRES_IGNORED);
 }
-
-#ifdef ACCURACY_ENABLE_RECOIL_CONTROL
-void DLL_POST_CmdEnd(const edict_t* pEdict)
-{
-	gAccuracyFix.CmdEnd(pEdict);
-
-	RETURN_META(MRES_IGNORED);
-}
-#endif
 #pragma endregion
