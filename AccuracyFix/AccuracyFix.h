@@ -15,6 +15,8 @@ private:
 
 	cvar_t* m_af_accuracy_all;
 	std::array<cvar_t*, MAX_WEAPONS + 1> m_af_accuracy;
+
+	cvar_t* m_af_jump_fix;
 };
 
 extern CAccuracyFix gAccuracyFix;
