@@ -8,6 +8,8 @@ void CAccuracyFix::ServerActivate()
 
 	this->m_af_distance_all = gAccuracyUtil.CvarRegister("af_distance_all", "-1.0");
 
+	this->m_af_jump_fix = gAccuracyUtil.CvarRegister("af_jump_fix", "0");
+
 	char cvarName[64] = { 0 };
 
 	for (int WeaponID = WEAPON_P228; WeaponID <= WEAPON_P90; WeaponID++)
@@ -75,7 +77,7 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 
 								if (DistanceLimit > 0.0f)
 								{
-									if (Player->pev->flags & FL_ONGROUND)
+									if ((this->m_af_jump_fix->value > 0) || (Player->pev->flags & FL_ONGROUND))
 									{
 										auto trResult = gAccuracyUtil.GetUserAiming(pentToSkip, DistanceLimit);
 	
