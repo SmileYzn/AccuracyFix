@@ -90,9 +90,7 @@ TraceResult CAccuracyUtil::GetUserAiming(edict_t* pEntity, float DistanceLimit)
 			g_engfuncs.pfnAngleVectors(pEntity->v.v_angle, v_forward, NULL, NULL);
 
 			Vector v_dest = v_src + v_forward * DistanceLimit;
-
-			gpGlobals->trace_flags = FTRACE_BULLET;
-
+			
 			g_engfuncs.pfnTraceLine(v_src, v_dest, 0, pEntity, &Result);
 		}
 	}
