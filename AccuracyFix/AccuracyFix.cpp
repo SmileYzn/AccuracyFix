@@ -50,7 +50,7 @@ void CAccuracyFix::ServerActivate()
 
 void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
-	if (fNoMonsters == dont_ignore_monsters)
+	if ((gpGlobals->trace_flags & FTRACE_BULLET) && (fNoMonsters == dont_ignore_monsters))
 	{
 		if (!FNullEnt(pentToSkip))
 		{
