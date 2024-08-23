@@ -91,6 +91,8 @@ TraceResult CAccuracyUtil::GetUserAiming(edict_t* pEntity, float DistanceLimit)
 
 			Vector v_dest = v_src + v_forward * DistanceLimit;
 
+			gpGlobals->trace_flags = FTRACE_BULLET;
+
 			g_engfuncs.pfnTraceLine(v_src, v_dest, 0, pEntity, &Result);
 		}
 	}
