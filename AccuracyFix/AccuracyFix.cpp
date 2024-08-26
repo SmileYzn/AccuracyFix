@@ -98,8 +98,6 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 	
 												auto vEndRes = (Vector)vStart + gpGlobals->v_forward * fwdVelocity;
 
-												gpGlobals->trace_flags = FTRACE_BULLET;
-
 												g_engfuncs.pfnTraceLine(vStart, vEndRes, fNoMonsters, pentToSkip, ptr);
 											}
 										}
