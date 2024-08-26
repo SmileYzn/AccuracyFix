@@ -50,7 +50,7 @@ void CAccuracyFix::ServerActivate()
 
 void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
-	if (fNoMonsters == dont_ignore_monsters)
+	if ((fNoMonsters == dont_ignore_monsters) && (gpGlobals->trace_flags == FTRACE_BULLET))
 	{
 		if (!FNullEnt(pentToSkip))
 		{
@@ -97,6 +97,8 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 												g_engfuncs.pfnMakeVectors(pentToSkip->v.v_angle);
 	
 												auto vEndRes = (Vector)vStart + gpGlobals->v_forward * fwdVelocity;
+
+												gpGlobals->trace_flags = FTRACE_BULLET;
 
 												g_engfuncs.pfnTraceLine(vStart, vEndRes, fNoMonsters, pentToSkip, ptr);
 											}
