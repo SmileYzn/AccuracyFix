@@ -37,15 +37,15 @@ void CAccuracyFix::ServerActivate()
 		}
 	}
 
-	//auto Path = gAccuracyUtil.GetPath();
+	auto Path = gAccuracyUtil.GetPath();
 
-	//if (Path)
-	//{
-	//	if (Path[0u] != '\0')
-	//	{
-	//		gAccuracyUtil.ServerCommand("exec %s/accuracyfix.cfg", Path);
-	//	}
-	//}
+	if (Path)
+	{
+		if (Path[0u] != '\0')
+		{
+			gAccuracyUtil.ServerCommand("exec %s/accuracyfix.cfg", Path);
+		}
+	}
 }
 
 void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
