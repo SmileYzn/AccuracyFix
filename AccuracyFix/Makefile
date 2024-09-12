@@ -19,7 +19,7 @@ OBJECTS 	= *.cpp
 LINKER 		= -static-libgcc -static-libstdc++
 
 # C flags
-CFLAGS 		= -std=gnu++11 -shared -m32 -msse3 -msse4.1 -pipe -g0 -O3 -s -flto -funroll-loops -fno-stack-protector -g -DNDEBUG -Dlinux -D__linux__ -DGLIBCXX_USE_CXX11_ABI=1 -U_FORTIFY_SOURCE
+CFLAGS 		= -std=gnu++11 -shared -mtune=generic -m32 -msse3 -msse4.1 -pipe -g0 -O3 -s -flto -funroll-loops -fno-stack-protector -g -DNDEBUG -Dlinux -D__linux__ -DGLIBCXX_USE_CXX11_ABI=0 -U_FORTIFY_SOURCE
 
 # Include directory
 INCLUDE 	= -I. -I$(CSSDK)/common -I$(CSSDK)/dlls -I$(CSSDK)/engine -I$(CSSDK)/game_shared -I$(CSSDK)/pm_shared -I$(CSSDK)/public -I$(METAMOD)
@@ -36,14 +36,16 @@ $(BIN_DIR)/%.o: %.c
 all:
 	mkdir -p $(BIN_DIR)
 
-	$(MAKE) $(NAME) && strip -x $(BIN_DIR)/$(NAME)_mm.so
+	$(MAKE) $(NAME)
+
+	strip -x $(BIN_DIR)/$(NAME)_mm.so
 
 $(NAME): $(OBJ_LINUX)
 
 	$(COMPILER) $(INCLUDE) $(CFLAGS) $(OBJ_LINUX) $(LINKER) -o$(BIN_DIR)/$(NAME)_mm.so
 
 check:
-	cppcheck $(INCLUDE) --quiet --max-configs=100 --std=gnu++11 -DNDEBUG -Dlinux -D__linux__ -U_FORTIFY_SOURCE .
+	cppcheck $(INCLUDE) --quiet --max-configs=100 --std=gnu++11 -DNDEBUG -Dlinux -D__linux__ -DGLIBCXX_USE_CXX11_ABI=0 -U_FORTIFY_SOURCE .
 
 default: all
 
