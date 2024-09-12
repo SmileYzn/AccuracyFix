@@ -11,7 +11,6 @@ C_DLLEXPORT int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersi
 {
 	memset(&gDLL_FunctionTable_Pre, 0, sizeof(DLL_FUNCTIONS));
 
-
 	memcpy(pFunctionTable, &gDLL_FunctionTable_Pre, sizeof(DLL_FUNCTIONS));
 
 	return 1;
