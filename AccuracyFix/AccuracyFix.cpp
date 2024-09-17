@@ -3,14 +3,14 @@
 CAccuracyFix gAccuracyFix;
 
 void CAccuracyFix::ServerActivate()
-{
+{	
 	this->m_af_accuracy_all = gAccuracyUtil.CvarRegister("af_accuracy_all", "-1.0");
 
 	this->m_af_distance_all = gAccuracyUtil.CvarRegister("af_distance_all", "-1.0");
 
-	this->m_af_jump_fix = gAccuracyUtil.CvarRegister("af_jump_fix", "0");
+	this->m_af_jump_fix = gAccuracyUtil.CvarRegister("af_jump_fix", "0.0");
 
-	/*if (g_ReGameApi)
+	if (g_ReGameApi)
 	{
 		char cvarName[32] = { 0 };
 
@@ -48,7 +48,7 @@ void CAccuracyFix::ServerActivate()
 		{
 			gAccuracyUtil.ServerCommand("exec %s/accuracyfix.cfg", Path);
 		}
-	}*/
+	}
 }
 
 void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)

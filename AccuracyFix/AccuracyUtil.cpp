@@ -4,28 +4,27 @@ CAccuracyUtil gAccuracyUtil;
 
 cvar_t* CAccuracyUtil::CvarRegister(const char* Name, const char* Value)
 {
-	cvar_t* pCvar = g_engfuncs.pfnCVarGetPointer(Name);
+	cvar_t* Pointer = g_engfuncs.pfnCVarGetPointer(Name);
 
-	if (!pCvar)
+	if (!Pointer)
 	{
-		this->m_CvarData[Name].name = Name;
+		static cvar_t CvarData;
+		
+		CvarData = { Name, (char*)(Value), FCVAR_SERVER | FCVAR_SPONLY, 0.0f, NULL };
 
-		this->m_CvarData[Name].string = (char*)(Value);
+		g_engfuncs.pfnCVarRegister(&CvarData);
+		
+		Pointer = g_engfuncs.pfnCVarGetPointer(Name);
 
-		this->m_CvarData[Name].flags = (FCVAR_SERVER | FCVAR_SPONLY | FCVAR_UNLOGGED);
-
-		g_engfuncs.pfnCVarRegister(&this->m_CvarData[Name]);
-
-		pCvar = g_engfuncs.pfnCVarGetPointer(this->m_CvarData[Name].name);
-
-		if (pCvar)
+		if(Pointer)
 		{
-			g_engfuncs.pfnCvar_DirectSet(pCvar, Value);
+			g_engfuncs.pfnCvar_DirectSet(Pointer, Value);
 		}
 	}
 
-	return pCvar;
+	return Pointer;
 }
+
 
 const char* CAccuracyUtil::GetPath()
 {
@@ -68,7 +67,7 @@ void CAccuracyUtil::ServerCommand(const char* Format, ...)
 
 	va_end(argptr);
 
-	Q_strncat(Command, "\n", 1);
+	Q_strncat(Command, "\n", sizeof(Command) - 1);
 
 	g_engfuncs.pfnServerCommand(Command);
 }

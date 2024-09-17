@@ -7,7 +7,7 @@
 
 // If is not MSVC build
 #ifndef _WIN32
-#define _GLIBCXX_USE_CXX11_ABI		0
+#define _GLIBCXX_USE_CXX11_ABI				0
 #define _stricmp					strcasecmp
 #define _strnicmp					strncasecmp
 #define _strdup						strdup

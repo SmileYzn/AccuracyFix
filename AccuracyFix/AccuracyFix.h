@@ -14,7 +14,6 @@ public:
 	void ServerActivate();
 	void TraceLine(const float* vStart, const float* vEnd, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr);
 
-private:
 	cvar_t* m_af_distance_all;
 	cvar_t* m_af_distance[MAX_WEAPONS + 1];
 	cvar_t* m_af_accuracy_all;
