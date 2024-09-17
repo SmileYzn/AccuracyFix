@@ -6,7 +6,7 @@ cvar_t* CAccuracyUtil::CvarRegister(const char* Name, const char* Value)
 {
 	cvar_t* pCvar = g_engfuncs.pfnCVarGetPointer(Name);
 
-	if (pCvar == nullptr)
+	if (!pCvar)
 	{
 		this->m_CvarData[Name].name = Name;
 
@@ -18,7 +18,7 @@ cvar_t* CAccuracyUtil::CvarRegister(const char* Name, const char* Value)
 
 		pCvar = g_engfuncs.pfnCVarGetPointer(this->m_CvarData[Name].name);
 
-		if (pCvar != nullptr)
+		if (pCvar)
 		{
 			g_engfuncs.pfnCvar_DirectSet(pCvar, Value);
 		}

@@ -4,33 +4,36 @@ CAccuracyFix gAccuracyFix;
 
 void CAccuracyFix::ServerActivate()
 {
-	/*this->m_af_accuracy_all = gAccuracyUtil.CvarRegister("af_accuracy_all", "-1.0");
+	this->m_af_accuracy_all = gAccuracyUtil.CvarRegister("af_accuracy_all", "-1.0");
 
 	this->m_af_distance_all = gAccuracyUtil.CvarRegister("af_distance_all", "-1.0");
 
 	this->m_af_jump_fix = gAccuracyUtil.CvarRegister("af_jump_fix", "0");
 
-	char cvarName[64] = { 0 };
-
-	for (int WeaponID = WEAPON_P228; WeaponID <= WEAPON_P90; WeaponID++)
+	if (g_ReGameApi)
 	{
-		auto SlotInfo = g_ReGameApi->GetWeaponSlot((WeaponIdType)WeaponID);
+		char cvarName[32] = { 0 };
 
-		if (SlotInfo)
+		for (int WeaponID = WEAPON_P228; WeaponID <= WEAPON_P90; WeaponID++)
 		{
-			if ((SlotInfo->slot == PRIMARY_WEAPON_SLOT) || (SlotInfo->slot == PISTOL_SLOT))
+			auto SlotInfo = g_ReGameApi->GetWeaponSlot((WeaponIdType)WeaponID);
+
+			if (SlotInfo)
 			{
-				if (SlotInfo->weaponName)
+				if ((SlotInfo->slot == PRIMARY_WEAPON_SLOT) || (SlotInfo->slot == PISTOL_SLOT))
 				{
-					if (SlotInfo->weaponName[0u] != '\0')
+					if (SlotInfo->weaponName)
 					{
-						Q_snprintf(cvarName, sizeof(cvarName), "af_distance_%s", SlotInfo->weaponName);
+						if (SlotInfo->weaponName[0u] != '\0')
+						{
+							Q_snprintf(cvarName, sizeof(cvarName), "af_distance_%s", SlotInfo->weaponName);
 
-						this->m_af_distance[WeaponID] = gAccuracyUtil.CvarRegister(cvarName, "8192.0");
+							this->m_af_distance[WeaponID] = gAccuracyUtil.CvarRegister(cvarName, "8192.0");
 
-						Q_snprintf(cvarName, sizeof(cvarName), "af_accuracy_%s", SlotInfo->weaponName);
+							Q_snprintf(cvarName, sizeof(cvarName), "af_accuracy_%s", SlotInfo->weaponName);
 
-						this->m_af_accuracy[WeaponID] = gAccuracyUtil.CvarRegister(cvarName, "9999.0");
+							this->m_af_accuracy[WeaponID] = gAccuracyUtil.CvarRegister(cvarName, "9999.0");
+						}
 					}
 				}
 			}
@@ -45,12 +48,12 @@ void CAccuracyFix::ServerActivate()
 		{
 			gAccuracyUtil.ServerCommand("exec %s/accuracyfix.cfg", Path);
 		}
-	}*/
+	}
 }
 
 void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMonsters, edict_t* pentToSkip, TraceResult* ptr)
 {
-	/*if ((fNoMonsters == dont_ignore_monsters) && (gpGlobals->trace_flags != FTRACE_FLASH))
+	if ((fNoMonsters == dont_ignore_monsters) && (gpGlobals->trace_flags != FTRACE_FLASH))
 	{
 		if (!FNullEnt(pentToSkip))
 		{
@@ -109,6 +112,6 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 				}
 			}
 		}
-	}*/
+	}
 }
 
