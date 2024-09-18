@@ -32,12 +32,11 @@ jobs:
     - name: Install build dependencies
       run: yes | yum -y --assumeyes install @'Development Tools' glibc-devel.i686 libgcc.i686 libstdc++-devel.i686 wget
 
-    - name: Export compiler include path
-      run: export CPATH=$CPATH:/usr/include/c++/4.8.5/i686-redhat-linux
-        
     - name: Run build
       working-directory: ./AccuracyFix
-      run: make
+      run: |
+        export CPATH=$CPATH:/usr/include/c++/4.8.5/i686-redhat-linux
+        make
     
     - name: Make Accuracy Fix path
       run: mkdir -p publish/addons/accuracyfix/dlls
