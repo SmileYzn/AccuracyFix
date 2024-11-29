@@ -25,7 +25,7 @@
 <h3>Settings and variables</h3>
 
 <details>
-    <summary>Click to open</summary>
+    <summary>Click to read</summary>
     
     // Fix traceline while player is jumping
     //
