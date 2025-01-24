@@ -1,57 +1,62 @@
-name: Build C/C++
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+name: Action Build System
+on: [push]
+env:
+  CONTAINER: ubuntu:18.04
 
 jobs:
   linux:
     name: Linux Build
     runs-on: ubuntu-latest
-    container: centos:7
-
-    env:
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-      ACTIONS_RUNNER_FORCED_INTERNAL_NODE_VERSION: node16
-      ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: node16
-
     steps:
-    - name: Setup Checkout
-      uses: actions/checkout@v3
 
-    - name: Fix CentOS 7 EOL repositories
+    - uses: actions/checkout@v4
+
+    - name: Start Docker Container
       run: |
-        sed -i.bak 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-        sed -i.bak 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+        docker pull $CONTAINER
+        docker run --name build-container -d -v ${{github.workspace}}:/desktop $CONTAINER tail -f /dev/null
 
-    - name: Update cache
-      run: yes | yum -y --assumeyes makecache
+    - name: Install Development Tools Packages
+      env:
+        SCRIPT: |
+          # Add i386 architecture
+          dpkg --add-architecture i386
 
-    - name: Install build dependencies
-      run: yes | yum -y --assumeyes install @'Development Tools' glibc-devel.i686 libgcc.i686 libstdc++-devel.i686 libgcc.i686 libstdc++-static.i686 wget
+          # Update repository
+          apt-get update > /dev/null
 
-    - name: Run build
-      working-directory: ./AccuracyFix
-      run: |
-        export CPATH=$CPATH:/usr/include/c++/4.8.5/i686-redhat-linux
-        make
-    
-    - name: Make Accuracy Fix path
-      run: mkdir -p publish/addons/accuracyfix/dlls
+          # Install build dependencies
+          apt-get install -qq -y wget unzip build-essential gcc-4.8-multilib g++-4.8-multilib libgcc1:i386 libcurl4-openssl-dev:i386 zlib1g-dev:i386 libssl-dev:i386 > /dev/null
 
-    - name: Make Accuracy Fix path
-      run: mv ./AccuracyFix/Release/accuracyfix_mm.so publish/addons/accuracyfix/dlls
-      
-    - name: Move settings file to folder
-      run: mv ./cstrike/addons/accuracyfix/accuracyfix.cfg publish/addons/accuracyfix/accuracyfix.cfg
+          # Update alternatives
+          update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-4.8
+      run: docker exec build-container bash -c "$SCRIPT"
+
+    - name: Execute Build
+      env:
+        SCRIPT: |
+          # Open makefile directory
+          cd /desktop/AccuracyFix
+
+          # Make Release Directory
+          mkdir -p Release
+
+          # Make linux (Without post build script)
+          make
+
+          # Make dlls path
+          mkdir -p ../cstrike/addons/accuracyfix/dlls
+
+          # Copy release file
+          cp ./Release/accuracyfix_mm.so ../cstrike/addons/accuracyfix/dlls
+
+      run: docker exec build-container bash -c "$SCRIPT"
 
     - name: Deploy artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: linux32
-        path: publish/*
+        path: ${{github.workspace}}/cstrike
         
   windows:
     name: Windows Build
@@ -66,10 +71,6 @@ jobs:
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
-
-    - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
     - name: Run Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
