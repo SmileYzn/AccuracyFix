@@ -18,9 +18,9 @@ bool ReAPI_Init()
 	}
 
 #ifdef WIN32
-	CSysModule* engineModule = Sys_LoadModule("swds.dll");
+	CSysModule* engineModule = Sys_GetModuleHandle("swds.dll");
 #else
-	CSysModule* engineModule = Sys_LoadModule("engine_i486.so");
+	CSysModule* engineModule = Sys_GetModuleHandle("engine_i486.so");
 #endif
 
 	if (!engineModule)

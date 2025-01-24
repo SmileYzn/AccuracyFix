@@ -71,6 +71,14 @@ void CAccuracyFix::TraceLine(const float* vStart, const float* vEnd, int fNoMons
 						{
 							if ((Player->m_pActiveItem->iItemSlot() == PRIMARY_WEAPON_SLOT) || (Player->m_pActiveItem->iItemSlot() == PISTOL_SLOT))
 							{
+								if ((Player->m_pActiveItem->m_iId == WEAPON_SG550) || (Player->m_pActiveItem->m_iId == WEAPON_AWP) || (Player->m_pActiveItem->m_iId == WEAPON_G3SG1))
+								{
+									if (Player->m_iFOV == 90)
+									{
+										return;
+									}
+								}
+
 								auto DistanceLimit = this->m_af_distance[Player->m_pActiveItem->m_iId]->value;
 
 								if (this->m_af_distance_all->value > 0)

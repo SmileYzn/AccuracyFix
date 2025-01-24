@@ -15,7 +15,7 @@ bool ReGameDLL_Init()
 		return false;
 	}
 
-	CSysModule *gameModule = Sys_LoadModule(szGameDLLModule);
+	CSysModule *gameModule = Sys_GetModuleHandle(szGameDLLModule);
 
 	if (!gameModule)
 	{
