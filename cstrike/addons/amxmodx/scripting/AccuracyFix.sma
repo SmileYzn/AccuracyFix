@@ -5,7 +5,7 @@
 #define MAX_WEAPONS 32
 
 // Weapon Slots by index
-new const g_iWeaponSlot[] = {0, 2, 0, 1, 4, 1, 5, 1, 1, 4, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 4, 2, 1, 1, 3, 1};
+new const g_iWeaponSlot[MAX_WEAPONS+1] = {0, 2, 0, 1, 4, 1, 5, 1, 1, 4, 2, 2, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 4, 2, 1, 1, 3, 1, 0, 0};
 
 // Player Weapon Index
 new g_iPlayerWeaponId[MAX_PLAYERS+1] = {0, ...};
